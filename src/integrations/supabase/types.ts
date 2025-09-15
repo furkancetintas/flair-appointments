@@ -14,7 +14,140 @@ export type Database = {
   }
   public: {
     Tables: {
-      [_ in never]: never
+      appointments: {
+        Row: {
+          appointment_date: string
+          appointment_time: string
+          barber_id: string
+          created_at: string
+          customer_id: string
+          id: string
+          notes: string | null
+          service: string
+          status: string
+          updated_at: string
+        }
+        Insert: {
+          appointment_date: string
+          appointment_time: string
+          barber_id: string
+          created_at?: string
+          customer_id: string
+          id?: string
+          notes?: string | null
+          service: string
+          status?: string
+          updated_at?: string
+        }
+        Update: {
+          appointment_date?: string
+          appointment_time?: string
+          barber_id?: string
+          created_at?: string
+          customer_id?: string
+          id?: string
+          notes?: string | null
+          service?: string
+          status?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "appointments_barber_id_fkey"
+            columns: ["barber_id"]
+            isOneToOne: false
+            referencedRelation: "barbers"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "appointments_customer_id_fkey"
+            columns: ["customer_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      barbers: {
+        Row: {
+          address: string | null
+          created_at: string
+          description: string | null
+          id: string
+          price_range: string | null
+          profile_id: string
+          services: string[] | null
+          shop_name: string
+          updated_at: string
+          working_hours: Json | null
+        }
+        Insert: {
+          address?: string | null
+          created_at?: string
+          description?: string | null
+          id?: string
+          price_range?: string | null
+          profile_id: string
+          services?: string[] | null
+          shop_name: string
+          updated_at?: string
+          working_hours?: Json | null
+        }
+        Update: {
+          address?: string | null
+          created_at?: string
+          description?: string | null
+          id?: string
+          price_range?: string | null
+          profile_id?: string
+          services?: string[] | null
+          shop_name?: string
+          updated_at?: string
+          working_hours?: Json | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "barbers_profile_id_fkey"
+            columns: ["profile_id"]
+            isOneToOne: true
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      profiles: {
+        Row: {
+          created_at: string
+          email: string
+          full_name: string
+          id: string
+          phone: string | null
+          role: string
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          email: string
+          full_name: string
+          id?: string
+          phone?: string | null
+          role?: string
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          email?: string
+          full_name?: string
+          id?: string
+          phone?: string | null
+          role?: string
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
     }
     Views: {
       [_ in never]: never
