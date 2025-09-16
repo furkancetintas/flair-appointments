@@ -10,7 +10,14 @@ import Dashboard from "./pages/Dashboard";
 import Barbers from "./pages/Barbers";
 import NotFound from "./pages/NotFound";
 
-const queryClient = new QueryClient();
+const queryClient = new QueryClient({
+  defaultOptions: {
+    queries: {
+      staleTime: 1000 * 60 * 5, // 5 minutes
+      retry: 1,
+    },
+  },
+});
 
 function ProtectedRoute({ children }: { children: React.ReactNode }) {
   const { user, loading } = useAuth();
@@ -48,25 +55,33 @@ function AuthRoute({ children }: { children: React.ReactNode }) {
   return <>{children}</>;
 }
 
-const App = () => (
-  <QueryClientProvider client={queryClient}>
-    <TooltipProvider>
-      <Toaster />
-      <Sonner />
-      <BrowserRouter>
+function AppRoutes() {
+  return (
+    <Routes>
+      <Route path="/" element={<Index />} />
+      <Route path="/auth" element={<AuthRoute><Auth /></AuthRoute>} />
+      <Route path="/dashboard" element={<ProtectedRoute><Dashboard /></ProtectedRoute>} />
+      <Route path="/barbers" element={<ProtectedRoute><Barbers /></ProtectedRoute>} />
+      {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
+      <Route path="*" element={<NotFound />} />
+    </Routes>
+  );
+}
+
+const App = () => {
+  return (
+    <BrowserRouter>
+      <QueryClientProvider client={queryClient}>
         <AuthProvider>
-          <Routes>
-            <Route path="/" element={<Index />} />
-            <Route path="/auth" element={<AuthRoute><Auth /></AuthRoute>} />
-            <Route path="/dashboard" element={<ProtectedRoute><Dashboard /></ProtectedRoute>} />
-            <Route path="/barbers" element={<ProtectedRoute><Barbers /></ProtectedRoute>} />
-            {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
-            <Route path="*" element={<NotFound />} />
-          </Routes>
+          <TooltipProvider>
+            <AppRoutes />
+            <Toaster />
+            <Sonner />
+          </TooltipProvider>
         </AuthProvider>
-      </BrowserRouter>
-    </TooltipProvider>
-  </QueryClientProvider>
-);
+      </QueryClientProvider>
+    </BrowserRouter>
+  );
+};
 
 export default App;
