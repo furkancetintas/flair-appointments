@@ -4,8 +4,10 @@ import { supabase } from '@/integrations/supabase/client';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
-import { Calendar, Clock, User, Scissors, LogOut } from 'lucide-react';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { Calendar, Clock, User, Scissors, LogOut, Settings } from 'lucide-react';
 import { Link } from 'react-router-dom';
+import BarberProfileForm from '@/components/BarberProfileForm';
 
 interface Appointment {
   id: string;
@@ -156,52 +158,144 @@ const Dashboard = () => {
           </div>
         </div>
 
-        {/* Appointments */}
-        <div className="space-y-6">
-          <div className="flex items-center gap-2">
-            <Calendar className="h-5 w-5 text-primary" />
-            <h2 className="text-xl font-semibold">Randevular</h2>
-          </div>
+        {/* Content based on user role */}
+        {profile?.role === 'barber' ? (
+          <Tabs defaultValue="appointments" className="space-y-6">
+            <TabsList className="grid w-full grid-cols-2">
+              <TabsTrigger value="appointments" className="flex items-center gap-2">
+                <Calendar className="h-4 w-4" />
+                Randevular
+              </TabsTrigger>
+              <TabsTrigger value="profile" className="flex items-center gap-2">
+                <Settings className="h-4 w-4" />
+                Profil Ayarları
+              </TabsTrigger>
+            </TabsList>
 
-          {appointments.length === 0 ? (
-            <Card>
-              <CardContent className="flex flex-col items-center justify-center py-12">
-                <Calendar className="h-12 w-12 text-muted-foreground mb-4" />
-                <p className="text-muted-foreground text-center">
-                  {profile?.role === 'customer' 
-                    ? 'Henüz hiç randevunuz yok. Berberler sayfasından randevu alabilirsiniz.' 
-                    : 'Henüz hiç randevu yok.'}
-                </p>
-                {profile?.role === 'customer' && (
+            <TabsContent value="appointments" className="space-y-6">
+              <div className="flex items-center gap-2">
+                <Calendar className="h-5 w-5 text-primary" />
+                <h2 className="text-xl font-semibold">Randevularım</h2>
+              </div>
+
+              {appointments.length === 0 ? (
+                <Card>
+                  <CardContent className="flex flex-col items-center justify-center py-12">
+                    <Calendar className="h-12 w-12 text-muted-foreground mb-4" />
+                    <p className="text-muted-foreground text-center">
+                      Henüz hiç randevu yok.
+                    </p>
+                  </CardContent>
+                </Card>
+              ) : (
+                <div className="grid gap-4">
+                  {appointments.map((appointment) => (
+                    <Card key={appointment.id}>
+                      <CardHeader>
+                        <div className="flex justify-between items-start">
+                          <div>
+                            <CardTitle className="flex items-center gap-2">
+                              <Clock className="h-4 w-4" />
+                              {new Date(appointment.appointment_date).toLocaleDateString('tr-TR')} - {appointment.appointment_time}
+                            </CardTitle>
+                            <CardDescription>
+                              {appointment.service}
+                            </CardDescription>
+                          </div>
+                          <Badge className={getStatusColor(appointment.status)}>
+                            {getStatusText(appointment.status)}
+                          </Badge>
+                        </div>
+                      </CardHeader>
+                      <CardContent>
+                        <div className="space-y-2">
+                          <div className="flex items-center gap-2">
+                            <User className="h-4 w-4 text-muted-foreground" />
+                            <span className="font-medium">{appointment.customer?.full_name}</span>
+                            <span className="text-muted-foreground">- {appointment.customer?.email}</span>
+                          </div>
+                          
+                          {appointment.notes && (
+                            <p className="text-sm text-muted-foreground mt-2">
+                              <strong>Not:</strong> {appointment.notes}
+                            </p>
+                          )}
+
+                          {appointment.status === 'pending' && (
+                            <div className="flex gap-2 mt-4">
+                              <Button 
+                                size="sm"
+                                onClick={() => updateAppointmentStatus(appointment.id, 'confirmed')}
+                              >
+                                Onayla
+                              </Button>
+                              <Button 
+                                variant="outline" 
+                                size="sm"
+                                onClick={() => updateAppointmentStatus(appointment.id, 'cancelled')}
+                              >
+                                İptal Et
+                              </Button>
+                            </div>
+                          )}
+                        </div>
+                      </CardContent>
+                    </Card>
+                  ))}
+                </div>
+              )}
+            </TabsContent>
+
+            <TabsContent value="profile" className="space-y-6">
+              <div className="flex items-center gap-2">
+                <Settings className="h-5 w-5 text-primary" />
+                <h2 className="text-xl font-semibold">Berber Profili</h2>
+              </div>
+              <BarberProfileForm profileId={profile.id} />
+            </TabsContent>
+          </Tabs>
+        ) : (
+          // Customer view
+          <div className="space-y-6">
+            <div className="flex items-center gap-2">
+              <Calendar className="h-5 w-5 text-primary" />
+              <h2 className="text-xl font-semibold">Randevularım</h2>
+            </div>
+
+            {appointments.length === 0 ? (
+              <Card>
+                <CardContent className="flex flex-col items-center justify-center py-12">
+                  <Calendar className="h-12 w-12 text-muted-foreground mb-4" />
+                  <p className="text-muted-foreground text-center">
+                    Henüz hiç randevunuz yok. Berberler sayfasından randevu alabilirsiniz.
+                  </p>
                   <Link to="/barbers" className="mt-4">
                     <Button>Randevu Al</Button>
                   </Link>
-                )}
-              </CardContent>
-            </Card>
-          ) : (
-            <div className="grid gap-4">
-              {appointments.map((appointment) => (
-                <Card key={appointment.id}>
-                  <CardHeader>
-                    <div className="flex justify-between items-start">
-                      <div>
-                        <CardTitle className="flex items-center gap-2">
-                          <Clock className="h-4 w-4" />
-                          {new Date(appointment.appointment_date).toLocaleDateString('tr-TR')} - {appointment.appointment_time}
-                        </CardTitle>
-                        <CardDescription>
-                          {appointment.service}
-                        </CardDescription>
+                </CardContent>
+              </Card>
+            ) : (
+              <div className="grid gap-4">
+                {appointments.map((appointment) => (
+                  <Card key={appointment.id}>
+                    <CardHeader>
+                      <div className="flex justify-between items-start">
+                        <div>
+                          <CardTitle className="flex items-center gap-2">
+                            <Clock className="h-4 w-4" />
+                            {new Date(appointment.appointment_date).toLocaleDateString('tr-TR')} - {appointment.appointment_time}
+                          </CardTitle>
+                          <CardDescription>
+                            {appointment.service}
+                          </CardDescription>
+                        </div>
+                        <Badge className={getStatusColor(appointment.status)}>
+                          {getStatusText(appointment.status)}
+                        </Badge>
                       </div>
-                      <Badge className={getStatusColor(appointment.status)}>
-                        {getStatusText(appointment.status)}
-                      </Badge>
-                    </div>
-                  </CardHeader>
-                  <CardContent>
-                    <div className="space-y-2">
-                      {profile?.role === 'customer' ? (
+                    </CardHeader>
+                    <CardContent>
+                      <div className="space-y-2">
                         <div className="flex items-center gap-2">
                           <Scissors className="h-4 w-4 text-muted-foreground" />
                           <span className="font-medium">{appointment.barber?.shop_name}</span>
@@ -209,44 +303,20 @@ const Dashboard = () => {
                             <span className="text-muted-foreground">- {appointment.barber.address}</span>
                           )}
                         </div>
-                      ) : (
-                        <div className="flex items-center gap-2">
-                          <User className="h-4 w-4 text-muted-foreground" />
-                          <span className="font-medium">{appointment.customer?.full_name}</span>
-                          <span className="text-muted-foreground">- {appointment.customer?.email}</span>
-                        </div>
-                      )}
-                      
-                      {appointment.notes && (
-                        <p className="text-sm text-muted-foreground mt-2">
-                          <strong>Not:</strong> {appointment.notes}
-                        </p>
-                      )}
-
-                      {profile?.role === 'barber' && appointment.status === 'pending' && (
-                        <div className="flex gap-2 mt-4">
-                          <Button 
-                            size="sm"
-                            onClick={() => updateAppointmentStatus(appointment.id, 'confirmed')}
-                          >
-                            Onayla
-                          </Button>
-                          <Button 
-                            variant="outline" 
-                            size="sm"
-                            onClick={() => updateAppointmentStatus(appointment.id, 'cancelled')}
-                          >
-                            İptal Et
-                          </Button>
-                        </div>
-                      )}
-                    </div>
-                  </CardContent>
-                </Card>
-              ))}
-            </div>
-          )}
-        </div>
+                        
+                        {appointment.notes && (
+                          <p className="text-sm text-muted-foreground mt-2">
+                            <strong>Not:</strong> {appointment.notes}
+                          </p>
+                        )}
+                      </div>
+                    </CardContent>
+                  </Card>
+                ))}
+              </div>
+            )}
+          </div>
+        )}
       </div>
     </div>
   );

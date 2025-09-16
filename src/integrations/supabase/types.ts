@@ -78,6 +78,7 @@ export type Database = {
           profile_id: string
           services: string[] | null
           shop_name: string
+          shop_status: string | null
           updated_at: string
           working_hours: Json | null
         }
@@ -90,6 +91,7 @@ export type Database = {
           profile_id: string
           services?: string[] | null
           shop_name: string
+          shop_status?: string | null
           updated_at?: string
           working_hours?: Json | null
         }
@@ -102,6 +104,7 @@ export type Database = {
           profile_id?: string
           services?: string[] | null
           shop_name?: string
+          shop_status?: string | null
           updated_at?: string
           working_hours?: Json | null
         }
