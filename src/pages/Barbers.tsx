@@ -1,75 +1,21 @@
-import { useEffect, useState } from 'react';
+import { useEffect } from 'react';
 import { Link } from 'react-router-dom';
-import { supabase } from '@/integrations/supabase/client';
+import { useAppDispatch } from '@/hooks/useAppDispatch';
+import { useAppSelector } from '@/hooks/useAppSelector';
+import { fetchBarbers, setSearchTerm } from '@/store/slices/barbersSlice';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Input } from '@/components/ui/input';
-import { MapPin, Clock, Star, Search, Scissors } from 'lucide-react';
-
-interface Barber {
-  id: string;
-  shop_name: string;
-  address: string | null;
-  description: string | null;
-  services: string[];
-  working_hours: any;
-  price_range: string | null;
-  profile: {
-    full_name: string;
-    email: string;
-    phone: string | null;
-  };
-}
+import { MapPin, Clock, Search, Scissors } from 'lucide-react';
 
 const Barbers = () => {
-  const [barbers, setBarbers] = useState<Barber[]>([]);
-  const [filteredBarbers, setFilteredBarbers] = useState<Barber[]>([]);
-  const [loading, setLoading] = useState(true);
-  const [searchTerm, setSearchTerm] = useState('');
+  const dispatch = useAppDispatch();
+  const { filteredBarbers, loading, searchTerm } = useAppSelector((state) => state.barbers);
 
   useEffect(() => {
-    fetchBarbers();
-  }, []);
-
-  useEffect(() => {
-    if (searchTerm.trim() === '') {
-      setFilteredBarbers(barbers);
-    } else {
-      const filtered = barbers.filter(barber => 
-        barber.shop_name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        barber.address?.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        barber.services.some(service => 
-          service.toLowerCase().includes(searchTerm.toLowerCase())
-        )
-      );
-      setFilteredBarbers(filtered);
-    }
-  }, [searchTerm, barbers]);
-
-  const fetchBarbers = async () => {
-    try {
-      const { data, error } = await supabase
-        .from('barbers')
-        .select(`
-          *,
-          profile:profiles!profile_id(full_name, email, phone)
-        `)
-        .order('shop_name');
-
-      if (error) {
-        console.error('Error fetching barbers:', error);
-        return;
-      }
-
-      setBarbers(data || []);
-      setFilteredBarbers(data || []);
-    } catch (error) {
-      console.error('Error fetching barbers:', error);
-    } finally {
-      setLoading(false);
-    }
-  };
+    dispatch(fetchBarbers());
+  }, [dispatch]);
 
   const formatWorkingHours = (workingHours: any) => {
     if (!workingHours) return 'Çalışma saatleri belirtilmemiş';
@@ -117,7 +63,7 @@ const Barbers = () => {
               type="text"
               placeholder="Berber, hizmet veya konum ara..."
               value={searchTerm}
-              onChange={(e) => setSearchTerm(e.target.value)}
+              onChange={(e) => dispatch(setSearchTerm(e.target.value))}
               className="pl-10"
             />
           </div>
