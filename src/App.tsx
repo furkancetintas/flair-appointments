@@ -8,6 +8,7 @@ import Index from "./pages/Index";
 import Auth from "./pages/Auth";
 import Dashboard from "./pages/Dashboard";
 import Barbers from "./pages/Barbers";
+import BarberProfile from "./pages/BarberProfile";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient({
@@ -62,6 +63,7 @@ function AppRoutes() {
       <Route path="/auth" element={<AuthRoute><Auth /></AuthRoute>} />
       <Route path="/dashboard" element={<ProtectedRoute><Dashboard /></ProtectedRoute>} />
       <Route path="/barbers" element={<ProtectedRoute><Barbers /></ProtectedRoute>} />
+      <Route path="/barber/:id" element={<ProtectedRoute><BarberProfile /></ProtectedRoute>} />
       {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
       <Route path="*" element={<NotFound />} />
     </Routes>
