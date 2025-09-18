@@ -1,6 +1,9 @@
-import { useEffect, useState } from 'react';
+import { useEffect } from 'react';
 import { useAuth } from '@/hooks/useAuth';
-import { supabase } from '@/integrations/supabase/client';
+import { useAppDispatch } from '@/hooks/useAppDispatch';
+import { useAppSelector } from '@/hooks/useAppSelector';
+import { fetchCustomerAppointments, fetchBarberAppointments, updateAppointmentStatus } from '@/store/slices/appointmentsSlice';
+import { fetchBarberByProfileId } from '@/store/slices/barbersSlice';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
@@ -9,94 +12,29 @@ import { Calendar, Clock, User, Scissors, LogOut, Settings } from 'lucide-react'
 import { Link } from 'react-router-dom';
 import BarberProfileForm from '@/components/BarberProfileForm';
 
-interface Appointment {
-  id: string;
-  appointment_date: string;
-  appointment_time: string;
-  service: string;
-  notes: string | null;
-  status: 'pending' | 'confirmed' | 'cancelled' | 'completed';
-  customer?: {
-    full_name: string;
-    email: string;
-    phone: string | null;
-  };
-  barber?: {
-    shop_name: string;
-    address: string | null;
-  };
-}
-
 const Dashboard = () => {
   const { profile, signOut } = useAuth();
-  const [appointments, setAppointments] = useState<Appointment[]>([]);
-  const [loading, setLoading] = useState(true);
+  const dispatch = useAppDispatch();
+  const { appointments, barberAppointments, loading } = useAppSelector((state) => state.appointments);
+  const { currentBarber } = useAppSelector((state) => state.barbers);
 
   useEffect(() => {
     if (profile) {
-      fetchAppointments();
-    }
-  }, [profile]);
-
-  const fetchAppointments = async () => {
-    if (!profile) return;
-
-    try {
-      let query = supabase.from('appointments').select(`
-        *,
-        customer:profiles!customer_id(full_name, email, phone),
-        barber:barbers!barber_id(shop_name, address)
-      `);
-
       if (profile.role === 'customer') {
-        query = query.eq('customer_id', profile.id);
+        dispatch(fetchCustomerAppointments(profile.id));
       } else {
-        // For barbers, get appointments for their barber profile
-        const { data: barberData } = await supabase
-          .from('barbers')
-          .select('id')
-          .eq('profile_id', profile.id)
-          .single();
-        
-        if (barberData) {
-          query = query.eq('barber_id', barberData.id);
-        }
+        // For barbers, first get their barber profile, then fetch appointments
+        dispatch(fetchBarberByProfileId(profile.id)).then((result: any) => {
+          if (result.payload?.id) {
+            dispatch(fetchBarberAppointments(result.payload.id));
+          }
+        });
       }
-
-      const { data, error } = await query
-        .order('appointment_date', { ascending: true })
-        .order('appointment_time', { ascending: true });
-
-      if (error) {
-        console.error('Error fetching appointments:', error);
-        return;
-      }
-
-      setAppointments((data || []) as Appointment[]);
-    } catch (error) {
-      console.error('Error fetching appointments:', error);
-    } finally {
-      setLoading(false);
     }
-  };
+  }, [profile, dispatch]);
 
-  const updateAppointmentStatus = async (appointmentId: string, status: string) => {
-    try {
-      const { error } = await supabase
-        .from('appointments')
-        .update({ status })
-        .eq('id', appointmentId);
-
-      if (error) {
-        console.error('Error updating appointment:', error);
-        return;
-      }
-
-      // Refresh appointments
-      fetchAppointments();
-    } catch (error) {
-      console.error('Error updating appointment:', error);
-    }
+  const handleUpdateAppointmentStatus = async (appointmentId: string, status: string) => {
+    dispatch(updateAppointmentStatus({ appointmentId, status }));
   };
 
   const getStatusColor = (status: string) => {
@@ -178,7 +116,7 @@ const Dashboard = () => {
                 <h2 className="text-xl font-semibold">Randevularım</h2>
               </div>
 
-              {appointments.length === 0 ? (
+              {barberAppointments.length === 0 ? (
                 <Card>
                   <CardContent className="flex flex-col items-center justify-center py-12">
                     <Calendar className="h-12 w-12 text-muted-foreground mb-4" />
@@ -189,7 +127,7 @@ const Dashboard = () => {
                 </Card>
               ) : (
                 <div className="grid gap-4">
-                  {appointments.map((appointment) => (
+                  {barberAppointments.map((appointment) => (
                     <Card key={appointment.id}>
                       <CardHeader>
                         <div className="flex justify-between items-start">
@@ -225,14 +163,14 @@ const Dashboard = () => {
                             <div className="flex gap-2 mt-4">
                               <Button 
                                 size="sm"
-                                onClick={() => updateAppointmentStatus(appointment.id, 'confirmed')}
+                                onClick={() => handleUpdateAppointmentStatus(appointment.id, 'confirmed')}
                               >
                                 Onayla
                               </Button>
                               <Button 
                                 variant="outline" 
                                 size="sm"
-                                onClick={() => updateAppointmentStatus(appointment.id, 'cancelled')}
+                                onClick={() => handleUpdateAppointmentStatus(appointment.id, 'cancelled')}
                               >
                                 İptal Et
                               </Button>
@@ -299,8 +237,8 @@ const Dashboard = () => {
                         <div className="flex items-center gap-2">
                           <Scissors className="h-4 w-4 text-muted-foreground" />
                           <span className="font-medium">{appointment.barber?.shop_name}</span>
-                          {appointment.barber?.address && (
-                            <span className="text-muted-foreground">- {appointment.barber.address}</span>
+                          {(appointment.barber as any)?.address && (
+                            <span className="text-muted-foreground">- {(appointment.barber as any).address}</span>
                           )}
                         </div>
                         

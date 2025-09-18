@@ -1,7 +1,10 @@
 import { useEffect, useState } from 'react';
 import { useParams, Link } from 'react-router-dom';
-import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/hooks/useAuth';
+import { useAppDispatch } from '@/hooks/useAppDispatch';
+import { useAppSelector } from '@/hooks/useAppSelector';
+import { fetchBarberById } from '@/store/slices/barbersSlice';
+import { fetchAppointmentsForDate, createAppointment } from '@/store/slices/appointmentsSlice';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
@@ -12,121 +15,39 @@ import { Calendar } from '@/components/ui/calendar';
 import { MapPin, Clock, Phone, Mail, ArrowLeft, Calendar as CalendarIcon } from 'lucide-react';
 import { format, addDays, isToday, isTomorrow } from 'date-fns';
 import { tr } from 'date-fns/locale';
-import { toast } from 'sonner';
-
-interface Barber {
-  id: string;
-  shop_name: string;
-  address: string | null;
-  description: string | null;
-  services: string[];
-  working_hours: any;
-  price_range: string | null;
-  shop_status: string;
-  profile: {
-    full_name: string;
-    email: string;
-    phone: string | null;
-  };
-}
-
-interface Appointment {
-  id: string;
-  appointment_date: string;
-  appointment_time: string;
-}
 
 const BarberProfile = () => {
   const { id } = useParams<{ id: string }>();
   const { profile } = useAuth();
-  const [barber, setBarber] = useState<Barber | null>(null);
-  const [loading, setLoading] = useState(true);
+  const dispatch = useAppDispatch();
+  const { currentBarber, loading } = useAppSelector((state) => state.barbers);
+  const { bookingLoading } = useAppSelector((state) => state.appointments);
+  
   const [selectedDate, setSelectedDate] = useState<Date | undefined>(new Date());
   const [selectedTime, setSelectedTime] = useState<string>('');
   const [selectedService, setSelectedService] = useState<string>('');
   const [notes, setNotes] = useState<string>('');
-  const [existingAppointments, setExistingAppointments] = useState<Appointment[]>([]);
-  const [bookingLoading, setBookingLoading] = useState(false);
+  const [bookedTimes, setBookedTimes] = useState<string[]>([]);
 
   useEffect(() => {
     if (id) {
-      fetchBarber();
-      fetchExistingAppointments();
+      dispatch(fetchBarberById(id));
     }
-  }, [id]);
+  }, [id, dispatch]);
 
   useEffect(() => {
     if (selectedDate && id) {
-      fetchAppointmentsForDate();
-    }
-  }, [selectedDate, id]);
-
-  const fetchBarber = async () => {
-    try {
-      const { data, error } = await supabase
-        .from('barbers')
-        .select(`
-          *,
-          profile:profiles!profile_id(full_name, email, phone)
-        `)
-        .eq('id', id)
-        .single();
-
-      if (error) {
-        console.error('Error fetching barber:', error);
-        return;
-      }
-
-      setBarber(data);
-    } catch (error) {
-      console.error('Error fetching barber:', error);
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  const fetchExistingAppointments = async () => {
-    try {
-      const { data, error } = await supabase
-        .from('appointments')
-        .select('id, appointment_date, appointment_time')
-        .eq('barber_id', id);
-
-      if (error) {
-        console.error('Error fetching appointments:', error);
-        return;
-      }
-
-      setExistingAppointments(data || []);
-    } catch (error) {
-      console.error('Error fetching appointments:', error);
-    }
-  };
-
-  const fetchAppointmentsForDate = async () => {
-    if (!selectedDate) return;
-
-    try {
       const dateStr = format(selectedDate, 'yyyy-MM-dd');
-      const { data, error } = await supabase
-        .from('appointments')
-        .select('appointment_time')
-        .eq('barber_id', id)
-        .eq('appointment_date', dateStr);
-
-      if (error) {
-        console.error('Error fetching appointments for date:', error);
-        return;
-      }
-
-      // This will be used to filter out booked times
-    } catch (error) {
-      console.error('Error fetching appointments for date:', error);
+      dispatch(fetchAppointmentsForDate({ barberId: id, date: dateStr })).then((result: any) => {
+        if (result.payload) {
+          setBookedTimes((result.payload as any[]).map((apt: any) => apt.appointment_time));
+        }
+      });
     }
-  };
+  }, [selectedDate, id, dispatch]);
 
   const generateTimeSlots = () => {
-    if (!barber || !selectedDate) return [];
+    if (!currentBarber || !selectedDate) return [];
 
     const dayName = format(selectedDate, 'EEEE', { locale: tr }).toLowerCase();
     const englishDayMap: { [key: string]: string } = {
@@ -140,7 +61,7 @@ const BarberProfile = () => {
     };
 
     const englishDay = englishDayMap[dayName];
-    const daySchedule = barber.working_hours?.[englishDay];
+    const daySchedule = currentBarber.working_hours?.[englishDay];
 
     if (!daySchedule || daySchedule.closed) {
       return [];
@@ -160,10 +81,7 @@ const BarberProfile = () => {
       const timeString = `${currentHour.toString().padStart(2, '0')}:${currentMinute.toString().padStart(2, '0')}`;
       
       // Check if this time slot is already booked
-      const dateStr = format(selectedDate, 'yyyy-MM-dd');
-      const isBooked = existingAppointments.some(
-        apt => apt.appointment_date === dateStr && apt.appointment_time === timeString
-      );
+      const isBooked = bookedTimes.includes(timeString);
 
       if (!isBooked) {
         slots.push(timeString);
@@ -198,47 +116,34 @@ const BarberProfile = () => {
   };
 
   const handleBookAppointment = async () => {
-    if (!profile || !selectedDate || !selectedTime || !selectedService) {
-      toast.error('Lütfen tüm alanları doldurunuz');
+    if (!profile || !selectedDate || !selectedTime || !selectedService || !id) {
       return;
     }
 
-    setBookingLoading(true);
+    const appointmentData = {
+      customer_id: profile.id,
+      barber_id: id,
+      appointment_date: format(selectedDate, 'yyyy-MM-dd'),
+      appointment_time: selectedTime,
+      service: selectedService,
+      notes: notes.trim() || undefined,
+    };
 
-    try {
-      const { error } = await supabase
-        .from('appointments')
-        .insert({
-          customer_id: profile.id,
-          barber_id: id,
-          appointment_date: format(selectedDate, 'yyyy-MM-dd'),
-          appointment_time: selectedTime,
-          service: selectedService,
-          notes: notes.trim() || null,
-          status: 'pending'
-        });
-
-      if (error) {
-        console.error('Error booking appointment:', error);
-        toast.error('Randevu alınırken bir hata oluştu');
-        return;
-      }
-
-      toast.success('Randevunuz başarıyla alındı!');
-      
+    const result = await dispatch(createAppointment(appointmentData));
+    
+    if (result.meta.requestStatus === 'fulfilled') {
       // Reset form
       setSelectedTime('');
       setSelectedService('');
       setNotes('');
       
-      // Refresh appointments
-      fetchExistingAppointments();
-      
-    } catch (error) {
-      console.error('Error booking appointment:', error);
-      toast.error('Randevu alınırken bir hata oluştu');
-    } finally {
-      setBookingLoading(false);
+      // Refresh booked times for the selected date
+      const dateStr = format(selectedDate, 'yyyy-MM-dd');
+      dispatch(fetchAppointmentsForDate({ barberId: id, date: dateStr })).then((result: any) => {
+        if (result.payload) {
+          setBookedTimes((result.payload as any[]).map((apt: any) => apt.appointment_time));
+        }
+      });
     }
   };
 
@@ -256,7 +161,7 @@ const BarberProfile = () => {
     );
   }
 
-  if (!barber) {
+  if (!currentBarber) {
     return (
       <div className="min-h-screen flex items-center justify-center">
         <Card className="max-w-md mx-auto">
@@ -296,57 +201,57 @@ const BarberProfile = () => {
           <div className="space-y-6">
             <Card>
               <CardHeader>
-                <CardTitle className="text-2xl">{barber.shop_name}</CardTitle>
+                <CardTitle className="text-2xl">{currentBarber.shop_name}</CardTitle>
                 <CardDescription className="text-lg">
-                  {barber.profile.full_name}
+                  {currentBarber.profile.full_name}
                 </CardDescription>
                 <div className="flex gap-2">
-                  <Badge variant={barber.shop_status === 'open' ? 'default' : 'secondary'}>
-                    {barber.shop_status === 'open' ? 'Açık' : 'Kapalı'}
+                  <Badge variant={currentBarber.shop_status === 'open' ? 'default' : 'secondary'}>
+                    {currentBarber.shop_status === 'open' ? 'Açık' : 'Kapalı'}
                   </Badge>
-                  {barber.price_range && (
+                  {currentBarber.price_range && (
                     <Badge variant="outline">
-                      {barber.price_range} ₺
+                      {currentBarber.price_range} ₺
                     </Badge>
                   )}
                 </div>
               </CardHeader>
               <CardContent className="space-y-4">
-                {barber.description && (
-                  <p className="text-muted-foreground">{barber.description}</p>
+                {currentBarber.description && (
+                  <p className="text-muted-foreground">{currentBarber.description}</p>
                 )}
 
-                {barber.address && (
+                {currentBarber.address && (
                   <div className="flex items-start gap-2">
                     <MapPin className="h-5 w-5 text-muted-foreground mt-0.5" />
-                    <span>{barber.address}</span>
+                    <span>{currentBarber.address}</span>
                   </div>
                 )}
 
-                {barber.profile.phone && (
+                {currentBarber.profile.phone && (
                   <div className="flex items-center gap-2">
                     <Phone className="h-5 w-5 text-muted-foreground" />
-                    <span>{barber.profile.phone}</span>
+                    <span>{currentBarber.profile.phone}</span>
                   </div>
                 )}
 
                 <div className="flex items-center gap-2">
                   <Mail className="h-5 w-5 text-muted-foreground" />
-                  <span>{barber.profile.email}</span>
+                  <span>{currentBarber.profile.email}</span>
                 </div>
 
                 <div className="flex items-start gap-2">
                   <Clock className="h-5 w-5 text-muted-foreground mt-0.5" />
                   <pre className="text-sm whitespace-pre-line">
-                    {formatWorkingHours(barber.working_hours)}
+                    {formatWorkingHours(currentBarber.working_hours)}
                   </pre>
                 </div>
 
-                {barber.services.length > 0 && (
+                {currentBarber.services.length > 0 && (
                   <div>
                     <h3 className="font-semibold mb-2">Hizmetler</h3>
                     <div className="flex flex-wrap gap-2">
-                      {barber.services.map((service, index) => (
+                      {currentBarber.services.map((service, index) => (
                         <Badge key={index} variant="outline">
                           {service}
                         </Badge>
@@ -423,7 +328,7 @@ const BarberProfile = () => {
                         <SelectValue placeholder="Hizmet seçin" />
                       </SelectTrigger>
                       <SelectContent>
-                        {barber.services.map((service) => (
+                        {currentBarber.services.map((service) => (
                           <SelectItem key={service} value={service}>
                             {service}
                           </SelectItem>
@@ -453,7 +358,7 @@ const BarberProfile = () => {
                 {selectedDate && selectedTime && selectedService && (
                   <Button 
                     onClick={handleBookAppointment}
-                    disabled={bookingLoading}
+                    disabled={bookingLoading || !profile}
                     className="w-full"
                     size="lg"
                   >

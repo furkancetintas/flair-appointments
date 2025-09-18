@@ -51,28 +51,6 @@ const initialState: BarbersState = {
 };
 
 // Async thunks
-export const fetchBarbers = createAsyncThunk(
-  'barbers/fetchBarbers',
-  async (_, { rejectWithValue }) => {
-    try {
-      const { data, error } = await supabase
-        .from('barbers')
-        .select(`
-          *,
-          profile:profiles!profile_id(full_name, email, phone)
-        `)
-        .order('shop_name');
-
-      if (error) throw error;
-
-      return data || [];
-    } catch (error: any) {
-      console.error('Error fetching barbers:', error);
-      return rejectWithValue(error.message);
-    }
-  }
-);
-
 export const fetchBarberById = createAsyncThunk(
   'barbers/fetchBarberById',
   async (barberId: string, { rejectWithValue }) => {
@@ -114,6 +92,28 @@ export const fetchBarberByProfileId = createAsyncThunk(
       return data;
     } catch (error: any) {
       console.error('Error fetching barber by profile:', error);
+      return rejectWithValue(error.message);
+    }
+  }
+);
+
+export const fetchBarbers = createAsyncThunk(
+  'barbers/fetchBarbers',
+  async (_, { rejectWithValue }) => {
+    try {
+      const { data, error } = await supabase
+        .from('barbers')
+        .select(`
+          *,
+          profile:profiles!profile_id(full_name, email, phone)
+        `)
+        .order('shop_name');
+
+      if (error) throw error;
+
+      return data || [];
+    } catch (error: any) {
+      console.error('Error fetching barbers:', error);
       return rejectWithValue(error.message);
     }
   }
