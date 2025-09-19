@@ -21,8 +21,11 @@ const BarberProfile = () => {
   const { id } = useParams<{ id: string }>();
   const { profile } = useAuth();
   const dispatch = useAppDispatch();
-  const { currentBarber, loading } = useAppSelector((state) => state.barbers);
-  const { bookingLoading } = useAppSelector((state) => state.appointments);
+  const barbersState = useAppSelector((state) => state.barbers);
+  const appointmentsState = useAppSelector((state) => state.appointments);
+  
+  const { currentBarber, loading } = barbersState;
+  const { bookingLoading } = appointmentsState;
   
   const [selectedDate, setSelectedDate] = useState<Date | undefined>(new Date());
   const [selectedTime, setSelectedTime] = useState<string>('');
