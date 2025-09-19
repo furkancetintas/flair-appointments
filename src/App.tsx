@@ -12,6 +12,12 @@ import Dashboard from "./pages/Dashboard";
 import Barbers from "./pages/Barbers";
 import BarberProfile from "./pages/BarberProfile";
 import NotFound from "./pages/NotFound";
+import { AdminLayout } from "./layouts/AdminLayout";
+import AdminEarnings from "./pages/admin/AdminEarnings";
+import AdminAppointments from "./pages/admin/AdminAppointments";
+import AdminServices from "./pages/admin/AdminServices";
+import AdminWorkingHours from "./pages/admin/AdminWorkingHours";
+import AdminShopStatus from "./pages/admin/AdminShopStatus";
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -66,6 +72,14 @@ function AppRoutes() {
       <Route path="/dashboard" element={<ProtectedRoute><Dashboard /></ProtectedRoute>} />
       <Route path="/barbers" element={<ProtectedRoute><Barbers /></ProtectedRoute>} />
       <Route path="/barber/:id" element={<ProtectedRoute><BarberProfile /></ProtectedRoute>} />
+      
+      {/* Admin Routes */}
+      <Route path="/admin/earnings" element={<ProtectedRoute><AdminLayout><AdminEarnings /></AdminLayout></ProtectedRoute>} />
+      <Route path="/admin/appointments" element={<ProtectedRoute><AdminLayout><AdminAppointments /></AdminLayout></ProtectedRoute>} />
+      <Route path="/admin/services" element={<ProtectedRoute><AdminLayout><AdminServices /></AdminLayout></ProtectedRoute>} />
+      <Route path="/admin/working-hours" element={<ProtectedRoute><AdminLayout><AdminWorkingHours /></AdminLayout></ProtectedRoute>} />
+      <Route path="/admin/shop-status" element={<ProtectedRoute><AdminLayout><AdminShopStatus /></AdminLayout></ProtectedRoute>} />
+      
       {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
       <Route path="*" element={<NotFound />} />
     </Routes>

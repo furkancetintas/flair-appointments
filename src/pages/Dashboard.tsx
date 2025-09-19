@@ -8,7 +8,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { Calendar, Clock, User, Scissors, LogOut, Settings } from 'lucide-react';
+import { Calendar, Clock, User, Scissors, LogOut, Settings, Shield } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import BarberProfileForm from '@/components/BarberProfileForm';
 
@@ -79,6 +79,14 @@ const Dashboard = () => {
             </p>
           </div>
           <div className="flex items-center gap-4">
+            {profile?.role === 'barber' && (
+              <Link to="/admin/earnings">
+                <Button className="flex items-center gap-2">
+                  <Shield className="h-4 w-4" />
+                  Admin Panel
+                </Button>
+              </Link>
+            )}
             <Link to="/barbers">
               <Button variant="outline" className="flex items-center gap-2">
                 <Scissors className="h-4 w-4" />
