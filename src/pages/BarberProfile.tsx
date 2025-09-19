@@ -5,6 +5,7 @@ import { useAppDispatch } from '@/hooks/useAppDispatch';
 import { useAppSelector } from '@/hooks/useAppSelector';
 import { fetchBarberById } from '@/store/slices/barbersSlice';
 import { fetchAppointmentsForDate, createAppointment } from '@/store/slices/appointmentsSlice';
+import { supabase } from '@/integrations/supabase/client';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
@@ -45,6 +46,39 @@ const BarberProfile = () => {
       });
     }
   }, [selectedDate, id, dispatch]);
+
+  // Real-time updates for appointments
+  useEffect(() => {
+    if (!id || !selectedDate) return;
+
+    const channel = supabase
+      .channel('appointment-updates')
+      .on(
+        'postgres_changes',
+        {
+          event: '*',
+          schema: 'public',
+          table: 'appointments',
+          filter: `barber_id=eq.${id}`
+        },
+        (payload) => {
+          console.log('Real-time appointment update:', payload);
+          
+          // Refresh available times for the selected date
+          const dateStr = format(selectedDate, 'yyyy-MM-dd');
+          dispatch(fetchAppointmentsForDate({ barberId: id, date: dateStr })).then((result: any) => {
+            if (result.payload) {
+              setBookedTimes((result.payload as any[]).map((apt: any) => apt.appointment_time));
+            }
+          });
+        }
+      )
+      .subscribe();
+
+    return () => {
+      supabase.removeChannel(channel);
+    };
+  }, [id, selectedDate, dispatch]);
 
   const generateTimeSlots = () => {
     if (!currentBarber || !selectedDate) return [];

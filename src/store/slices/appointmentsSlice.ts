@@ -127,6 +127,18 @@ export const createAppointment = createAsyncThunk(
     notes?: string;
   }, { rejectWithValue }) => {
     try {
+      // First check if the time slot is available using our database function
+      const { data: isAvailable } = await supabase.rpc('check_appointment_availability', {
+        barber_id_param: appointmentData.barber_id,
+        appointment_date_param: appointmentData.appointment_date,
+        appointment_time_param: appointmentData.appointment_time
+      });
+
+      if (!isAvailable) {
+        toast.error('Bu saat dolu! Lütfen başka bir saat seçin.');
+        return rejectWithValue('Time slot not available');
+      }
+
       const { data, error } = await supabase
         .from('appointments')
         .insert({
@@ -142,7 +154,14 @@ export const createAppointment = createAsyncThunk(
         `)
         .single();
 
-      if (error) throw error;
+      if (error) {
+        // Handle unique constraint violation
+        if (error.code === '23505') {
+          toast.error('Bu saat dolu! Lütfen başka bir saat seçin.');
+          return rejectWithValue('Time slot already booked');
+        }
+        throw error;
+      }
 
       toast.success('Randevunuz başarıyla alındı!');
       return data;
