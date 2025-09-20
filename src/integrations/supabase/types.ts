@@ -23,6 +23,7 @@ export type Database = {
           customer_id: string
           id: string
           notes: string | null
+          price: number | null
           service: string
           status: string
           updated_at: string
@@ -35,6 +36,7 @@ export type Database = {
           customer_id: string
           id?: string
           notes?: string | null
+          price?: number | null
           service: string
           status?: string
           updated_at?: string
@@ -47,6 +49,7 @@ export type Database = {
           customer_id?: string
           id?: string
           notes?: string | null
+          price?: number | null
           service?: string
           status?: string
           updated_at?: string
@@ -71,6 +74,7 @@ export type Database = {
       barbers: {
         Row: {
           address: string | null
+          appointment_duration: number | null
           created_at: string
           description: string | null
           id: string
@@ -84,6 +88,7 @@ export type Database = {
         }
         Insert: {
           address?: string | null
+          appointment_duration?: number | null
           created_at?: string
           description?: string | null
           id?: string
@@ -97,6 +102,7 @@ export type Database = {
         }
         Update: {
           address?: string | null
+          appointment_duration?: number | null
           created_at?: string
           description?: string | null
           id?: string
@@ -117,6 +123,39 @@ export type Database = {
             referencedColumns: ["id"]
           },
         ]
+      }
+      earnings: {
+        Row: {
+          amount: number
+          appointment_id: string | null
+          barber_id: string
+          created_at: string
+          earned_date: string
+          id: string
+          service_name: string
+          updated_at: string
+        }
+        Insert: {
+          amount: number
+          appointment_id?: string | null
+          barber_id: string
+          created_at?: string
+          earned_date?: string
+          id?: string
+          service_name: string
+          updated_at?: string
+        }
+        Update: {
+          amount?: number
+          appointment_id?: string | null
+          barber_id?: string
+          created_at?: string
+          earned_date?: string
+          id?: string
+          service_name?: string
+          updated_at?: string
+        }
+        Relationships: []
       }
       profiles: {
         Row: {
