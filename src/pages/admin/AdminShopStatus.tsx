@@ -45,8 +45,14 @@ export default function AdminShopStatus() {
       await dispatch(createOrUpdateBarberProfile({
         profileId: profile.id,
         barberData: {
-          ...currentBarber,
+          shop_name: currentBarber.shop_name,
+          address: currentBarber.address || '',
+          description: currentBarber.description || '',
+          services: currentBarber.services,
+          working_hours: currentBarber.working_hours,
+          price_range: currentBarber.price_range || '50-150',
           shop_status: newStatus ? 'open' : 'closed',
+          appointment_duration: currentBarber.appointment_duration || 30,
         }
       }));
       

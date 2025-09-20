@@ -12,6 +12,7 @@ export interface Barber {
   price_range: string | null;
   shop_status: string;
   profile_id: string;
+  appointment_duration?: number;
   profile: {
     full_name: string;
     email: string;
@@ -28,6 +29,7 @@ export interface BarberProfile {
   working_hours: any;
   price_range: string;
   shop_status: 'open' | 'closed';
+  appointment_duration?: number;
 }
 
 interface BarbersState {

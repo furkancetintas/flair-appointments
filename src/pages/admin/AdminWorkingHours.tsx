@@ -39,6 +39,12 @@ export default function AdminWorkingHours() {
   const [appointmentInterval, setAppointmentInterval] = useState(30);
 
   useEffect(() => {
+    if (currentBarber?.appointment_duration) {
+      setAppointmentInterval(currentBarber.appointment_duration);
+    }
+  }, [currentBarber?.appointment_duration]);
+
+  useEffect(() => {
     if (profile?.id) {
       dispatch(fetchBarberByProfileId(profile.id));
     }
@@ -94,11 +100,35 @@ export default function AdminWorkingHours() {
           working_hours: workingHours,
           price_range: currentBarber.price_range || '50-150',
           shop_status: (currentBarber.shop_status as 'open' | 'closed') || 'closed',
+          appointment_duration: appointmentInterval,
         }
       }));
       toast.success("Çalışma saatleri başarıyla güncellendi!");
     } catch (error) {
       toast.error("Çalışma saatleri güncellenirken bir hata oluştu");
+    }
+  };
+
+  const handleSaveAppointmentSettings = async () => {
+    if (!profile?.id || !currentBarber) return;
+
+    try {
+      await dispatch(createOrUpdateBarberProfile({
+        profileId: profile.id,
+        barberData: {
+          shop_name: currentBarber.shop_name,
+          address: currentBarber.address || '',
+          description: currentBarber.description || '',
+          services: currentBarber.services,
+          working_hours: currentBarber.working_hours,
+          price_range: currentBarber.price_range || '50-150',
+          shop_status: (currentBarber.shop_status as 'open' | 'closed') || 'closed',
+          appointment_duration: appointmentInterval,
+        }
+      }));
+      toast.success("Randevu ayarları başarıyla güncellendi!");
+    } catch (error) {
+      toast.error("Randevu ayarları güncellenirken bir hata oluştu");
     }
   };
 
@@ -254,6 +284,14 @@ export default function AdminWorkingHours() {
               </select>
             </div>
           </div>
+
+          <Button 
+            onClick={handleSaveAppointmentSettings}
+            disabled={updateLoading}
+            className="w-full mb-4"
+          >
+            {updateLoading ? "Kaydediliyor..." : "Randevu Ayarlarını Kaydet"}
+          </Button>
 
           <div className="p-4 bg-muted/50 rounded-lg">
             <h4 className="font-medium mb-2">💡 Randevu Sistemi Bilgileri</h4>

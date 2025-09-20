@@ -1,36 +1,154 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
+import { useAppDispatch } from "@/hooks/useAppDispatch";
+import { useAppSelector } from "@/hooks/useAppSelector";
+import { fetchBarberByProfileId } from "@/store/slices/barbersSlice";
+import { useAuth } from "@/hooks/useAuth";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { TrendingUp, DollarSign, Calendar, BarChart3 } from "lucide-react";
+import { supabase } from "@/integrations/supabase/client";
+import { startOfWeek, endOfWeek, startOfMonth, endOfMonth, format, subDays, startOfDay, endOfDay } from "date-fns";
+import { tr } from "date-fns/locale";
+
+interface EarningsData {
+  today: number;
+  thisWeek: number;
+  thisMonth: number;
+  daily: { date: string; amount: number }[];
+  weekly: { week: string; amount: number }[];
+  monthly: { month: string; amount: number }[];
+}
 
 export default function AdminEarnings() {
+  const dispatch = useAppDispatch();
+  const { profile } = useAuth();
+  const { currentBarber } = useAppSelector((state) => state.barbers);
   const [activeTab, setActiveTab] = useState("daily");
+  const [earningsData, setEarningsData] = useState<EarningsData>({
+    today: 0,
+    thisWeek: 0,
+    thisMonth: 0,
+    daily: [],
+    weekly: [],
+    monthly: [],
+  });
+  const [loading, setLoading] = useState(true);
 
-  // Dummy data - in real app, fetch from API
-  const earningsData = {
-    today: 1250,
-    thisWeek: 8750,
-    thisMonth: 32500,
-    daily: [
-      { date: "Pzt", amount: 850 },
-      { date: "Sal", amount: 1200 },
-      { date: "Çar", amount: 950 },
-      { date: "Per", amount: 1400 },
-      { date: "Cum", amount: 1600 },
-      { date: "Cmt", amount: 1100 },
-      { date: "Paz", amount: 800 },
-    ],
-    weekly: [
-      { week: "1. Hafta", amount: 6500 },
-      { week: "2. Hafta", amount: 7200 },
-      { week: "3. Hafta", amount: 8100 },
-      { week: "4. Hafta", amount: 8750 },
-    ],
-    monthly: [
-      { month: "Ocak", amount: 28500 },
-      { month: "Şubat", amount: 31200 },
-      { month: "Mart", amount: 32500 },
-    ],
+  useEffect(() => {
+    if (profile?.id) {
+      dispatch(fetchBarberByProfileId(profile.id));
+    }
+  }, [dispatch, profile?.id]);
+
+  useEffect(() => {
+    if (currentBarber?.id) {
+      fetchEarningsData();
+    }
+  }, [currentBarber?.id]);
+
+  const fetchEarningsData = async () => {
+    if (!currentBarber?.id) return;
+
+    try {
+      setLoading(true);
+      
+      const today = new Date();
+      const startOfToday = startOfDay(today);
+      const endOfToday = endOfDay(today);
+      const startOfThisWeek = startOfWeek(today, { weekStartsOn: 1 });
+      const endOfThisWeek = endOfWeek(today, { weekStartsOn: 1 });
+      const startOfThisMonth = startOfMonth(today);
+      const endOfThisMonth = endOfMonth(today);
+
+      // Fetch today's earnings
+      const { data: todayEarnings } = await supabase
+        .from('earnings')
+        .select('amount')
+        .eq('barber_id', currentBarber.id)
+        .gte('earned_date', format(startOfToday, 'yyyy-MM-dd'))
+        .lte('earned_date', format(endOfToday, 'yyyy-MM-dd'));
+
+      // Fetch this week's earnings
+      const { data: weekEarnings } = await supabase
+        .from('earnings')
+        .select('amount')
+        .eq('barber_id', currentBarber.id)
+        .gte('earned_date', format(startOfThisWeek, 'yyyy-MM-dd'))
+        .lte('earned_date', format(endOfThisWeek, 'yyyy-MM-dd'));
+
+      // Fetch this month's earnings
+      const { data: monthEarnings } = await supabase
+        .from('earnings')
+        .select('amount')
+        .eq('barber_id', currentBarber.id)
+        .gte('earned_date', format(startOfThisMonth, 'yyyy-MM-dd'))
+        .lte('earned_date', format(endOfThisMonth, 'yyyy-MM-dd'));
+
+      // Fetch daily earnings for the past 7 days
+      const dailyEarnings = [];
+      for (let i = 6; i >= 0; i--) {
+        const date = subDays(today, i);
+        const { data: dayData } = await supabase
+          .from('earnings')
+          .select('amount')
+          .eq('barber_id', currentBarber.id)
+          .eq('earned_date', format(date, 'yyyy-MM-dd'));
+        
+        dailyEarnings.push({
+          date: format(date, 'eee', { locale: tr }).substring(0, 3),
+          amount: dayData?.reduce((sum, earning) => sum + Number(earning.amount), 0) || 0
+        });
+      }
+
+      // Fetch weekly earnings for the past 4 weeks
+      const weeklyEarnings = [];
+      for (let i = 3; i >= 0; i--) {
+        const weekStart = startOfWeek(subDays(today, i * 7), { weekStartsOn: 1 });
+        const weekEnd = endOfWeek(subDays(today, i * 7), { weekStartsOn: 1 });
+        const { data: weekData } = await supabase
+          .from('earnings')
+          .select('amount')
+          .eq('barber_id', currentBarber.id)
+          .gte('earned_date', format(weekStart, 'yyyy-MM-dd'))
+          .lte('earned_date', format(weekEnd, 'yyyy-MM-dd'));
+        
+        weeklyEarnings.push({
+          week: `${4 - i}. Hafta`,
+          amount: weekData?.reduce((sum, earning) => sum + Number(earning.amount), 0) || 0
+        });
+      }
+
+      // Fetch monthly earnings for the past 3 months
+      const monthlyEarnings = [];
+      for (let i = 2; i >= 0; i--) {
+        const monthStart = startOfMonth(subDays(today, i * 30));
+        const monthEnd = endOfMonth(subDays(today, i * 30));
+        const { data: monthData } = await supabase
+          .from('earnings')
+          .select('amount')
+          .eq('barber_id', currentBarber.id)
+          .gte('earned_date', format(monthStart, 'yyyy-MM-dd'))
+          .lte('earned_date', format(monthEnd, 'yyyy-MM-dd'));
+        
+        monthlyEarnings.push({
+          month: format(subDays(today, i * 30), 'MMMM', { locale: tr }),
+          amount: monthData?.reduce((sum, earning) => sum + Number(earning.amount), 0) || 0
+        });
+      }
+
+      setEarningsData({
+        today: todayEarnings?.reduce((sum, earning) => sum + Number(earning.amount), 0) || 0,
+        thisWeek: weekEarnings?.reduce((sum, earning) => sum + Number(earning.amount), 0) || 0,
+        thisMonth: monthEarnings?.reduce((sum, earning) => sum + Number(earning.amount), 0) || 0,
+        daily: dailyEarnings,
+        weekly: weeklyEarnings,
+        monthly: monthlyEarnings,
+      });
+    } catch (error) {
+      console.error('Kazanç verileri alınırken hata:', error);
+    } finally {
+      setLoading(false);
+    }
   };
 
   const ChartBar = ({ label, amount, maxAmount }: { label: string; amount: number; maxAmount: number }) => {
@@ -70,6 +188,17 @@ export default function AdminEarnings() {
       </div>
     );
   };
+
+  if (loading) {
+    return (
+      <div className="space-y-6">
+        <div>
+          <h2 className="text-2xl font-bold mb-2">Kazançlar</h2>
+          <p className="text-muted-foreground">Veriler yükleniyor...</p>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="space-y-6">
