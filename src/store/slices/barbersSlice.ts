@@ -2,6 +2,7 @@ import { createSlice, createAsyncThunk, PayloadAction } from '@reduxjs/toolkit';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
 
+// Public barber data (without sensitive info)
 export interface Barber {
   id: string;
   shop_name: string;
@@ -13,6 +14,12 @@ export interface Barber {
   shop_status: string;
   profile_id: string;
   appointment_duration?: number;
+  barber_full_name: string;
+  role: string;
+}
+
+// Authenticated barber data (with full profile for own data)
+export interface BarberWithProfile extends Omit<Barber, 'barber_full_name' | 'role'> {
   profile: {
     full_name: string;
     email: string;
@@ -34,7 +41,7 @@ export interface BarberProfile {
 
 interface BarbersState {
   barbers: Barber[];
-  currentBarber: Barber | null;
+  currentBarber: BarberWithProfile | null;
   filteredBarbers: Barber[];
   searchTerm: string;
   loading: boolean;
@@ -70,7 +77,6 @@ export const fetchBarberById = createAsyncThunk(
 
       return data;
     } catch (error: any) {
-      console.error('Error fetching barber:', error);
       return rejectWithValue(error.message);
     }
   }
@@ -93,7 +99,6 @@ export const fetchBarberByProfileId = createAsyncThunk(
 
       return data;
     } catch (error: any) {
-      console.error('Error fetching barber by profile:', error);
       return rejectWithValue(error.message);
     }
   }
@@ -103,19 +108,16 @@ export const fetchBarbers = createAsyncThunk(
   'barbers/fetchBarbers',
   async (_, { rejectWithValue }) => {
     try {
+      // Use the public view that excludes sensitive data
       const { data, error } = await supabase
-        .from('barbers')
-        .select(`
-          *,
-          profile:profiles!profile_id(full_name, email, phone)
-        `)
+        .from('barbers_public')
+        .select('*')
         .order('shop_name');
 
       if (error) throw error;
 
       return data || [];
     } catch (error: any) {
-      console.error('Error fetching barbers:', error);
       return rejectWithValue(error.message);
     }
   }
@@ -169,7 +171,6 @@ export const createOrUpdateBarberProfile = createAsyncThunk(
       toast.success('Berber profili başarıyla kaydedildi!');
       return data;
     } catch (error: any) {
-      console.error('Error saving barber profile:', error);
       toast.error('Profil kaydedilirken bir hata oluştu');
       return rejectWithValue(error.message);
     }
@@ -248,25 +249,41 @@ const barbersSlice = createSlice({
         state.updateLoading = false;
         state.currentBarber = action.payload;
         
+        // Convert BarberWithProfile to Barber for the public list
+        const publicBarber: Barber = {
+          id: action.payload.id,
+          shop_name: action.payload.shop_name,
+          address: action.payload.address,
+          description: action.payload.description,
+          services: action.payload.services,
+          working_hours: action.payload.working_hours,
+          price_range: action.payload.price_range,
+          shop_status: action.payload.shop_status,
+          profile_id: action.payload.profile_id,
+          appointment_duration: action.payload.appointment_duration,
+          barber_full_name: action.payload.profile.full_name,
+          role: 'barber'
+        };
+        
         // Update the barber in the list
         const index = state.barbers.findIndex(b => b.id === action.payload.id);
         if (index >= 0) {
-          state.barbers[index] = action.payload;
+          state.barbers[index] = publicBarber;
         } else {
-          state.barbers.push(action.payload);
+          state.barbers.push(publicBarber);
         }
         
         // Update filtered barbers
         const filteredIndex = state.filteredBarbers.findIndex(b => b.id === action.payload.id);
         if (filteredIndex >= 0) {
-          state.filteredBarbers[filteredIndex] = action.payload;
+          state.filteredBarbers[filteredIndex] = publicBarber;
         } else if (state.searchTerm === '' || 
           action.payload.shop_name.toLowerCase().includes(state.searchTerm.toLowerCase()) ||
           action.payload.address?.toLowerCase().includes(state.searchTerm.toLowerCase()) ||
           action.payload.services.some(service => 
             service.toLowerCase().includes(state.searchTerm.toLowerCase())
           )) {
-          state.filteredBarbers.push(action.payload);
+          state.filteredBarbers.push(publicBarber);
         }
       })
       .addCase(createOrUpdateBarberProfile.rejected, (state, action) => {
