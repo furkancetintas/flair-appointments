@@ -8,6 +8,8 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { useAuth } from '@/hooks/useAuth';
 import { Scissors, UserPlus, LogIn } from 'lucide-react';
+import { loginSchema, signupSchema } from '@/lib/validation';
+import { toast } from 'sonner';
 
 const Auth = () => {
   const navigate = useNavigate();
@@ -24,8 +26,16 @@ const Auth = () => {
 
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
-    setIsLoading(true);
     
+    // Validate input
+    const validation = loginSchema.safeParse(loginForm);
+    if (!validation.success) {
+      const firstError = validation.error.errors[0];
+      toast.error(firstError.message);
+      return;
+    }
+    
+    setIsLoading(true);
     const { error } = await signIn(loginForm.email, loginForm.password);
     
     if (!error) {
@@ -37,8 +47,16 @@ const Auth = () => {
 
   const handleSignup = async (e: React.FormEvent) => {
     e.preventDefault();
-    setIsLoading(true);
     
+    // Validate input
+    const validation = signupSchema.safeParse(signupForm);
+    if (!validation.success) {
+      const firstError = validation.error.errors[0];
+      toast.error(firstError.message);
+      return;
+    }
+    
+    setIsLoading(true);
     const { error } = await signUp(
       signupForm.email, 
       signupForm.password, 

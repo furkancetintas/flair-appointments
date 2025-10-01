@@ -85,7 +85,6 @@ const BarberProfileForm = ({ profileId }: BarberProfileFormProps) => {
         .maybeSingle();
 
       if (error && error.code !== 'PGRST116') {
-        console.error('Error fetching barber profile:', error);
         return;
       }
 
@@ -115,7 +114,7 @@ const BarberProfileForm = ({ profileId }: BarberProfileFormProps) => {
         });
       }
     } catch (error) {
-      console.error('Error fetching barber profile:', error);
+      // Error is handled silently
     }
   };
 
@@ -162,7 +161,6 @@ const BarberProfileForm = ({ profileId }: BarberProfileFormProps) => {
         title: 'Hata',
         description: 'Profil kaydedilirken bir hata oluştu.'
       });
-      console.error('Error saving barber profile:', error);
     } finally {
       setLoading(false);
     }

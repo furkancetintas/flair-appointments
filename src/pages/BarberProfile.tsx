@@ -65,8 +65,6 @@ const BarberProfile = () => {
           filter: `barber_id=eq.${id}`
         },
         (payload) => {
-          console.log('Real-time appointment update:', payload);
-          
           // Refresh available times for the selected date
           const dateStr = format(selectedDate, 'yyyy-MM-dd');
           dispatch(fetchAppointmentsForDate({ barberId: id, date: dateStr })).then((result: any) => {

@@ -75,10 +75,13 @@ export const signUp = createAsyncThunk(
     role: 'customer' | 'barber';
   }, { rejectWithValue }) => {
     try {
+      const redirectUrl = `${window.location.origin}/`;
+      
       const { data, error } = await supabase.auth.signUp({
         email,
         password,
         options: {
+          emailRedirectTo: redirectUrl,
           data: {
             full_name: fullName,
             role: role,
@@ -152,9 +155,12 @@ export const updateProfile = createAsyncThunk(
       
       if (!currentProfile) throw new Error('No profile found');
 
+      // Remove role from update data to prevent escalation
+      const { role, ...safeProfileData } = profileData;
+
       const { data, error } = await supabase
         .from('profiles')
-        .update(profileData)
+        .update(safeProfileData)
         .eq('id', currentProfile.id)
         .select()
         .single();
