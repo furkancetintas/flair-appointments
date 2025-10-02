@@ -2,7 +2,6 @@ import { createSlice, createAsyncThunk, PayloadAction } from '@reduxjs/toolkit';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
 
-// Public barber data (without sensitive info)
 export interface Barber {
   id: string;
   shop_name: string;
@@ -14,12 +13,6 @@ export interface Barber {
   shop_status: string;
   profile_id: string;
   appointment_duration?: number;
-  barber_full_name: string;
-  role: string;
-}
-
-// Authenticated barber data (with full profile for own data)
-export interface BarberWithProfile extends Omit<Barber, 'barber_full_name' | 'role'> {
   profile: {
     full_name: string;
     email: string;
@@ -41,7 +34,7 @@ export interface BarberProfile {
 
 interface BarbersState {
   barbers: Barber[];
-  currentBarber: BarberWithProfile | null;
+  currentBarber: Barber | null;
   filteredBarbers: Barber[];
   searchTerm: string;
   loading: boolean;
@@ -108,10 +101,12 @@ export const fetchBarbers = createAsyncThunk(
   'barbers/fetchBarbers',
   async (_, { rejectWithValue }) => {
     try {
-      // Use the public view that excludes sensitive data
       const { data, error } = await supabase
-        .from('barbers_public')
-        .select('*')
+        .from('barbers')
+        .select(`
+          *,
+          profile:profiles!profile_id(full_name, email, phone)
+        `)
         .order('shop_name');
 
       if (error) throw error;
@@ -191,6 +186,7 @@ const barbersSlice = createSlice({
         state.filteredBarbers = state.barbers.filter(barber => 
           barber.shop_name.toLowerCase().includes(action.payload.toLowerCase()) ||
           barber.address?.toLowerCase().includes(action.payload.toLowerCase()) ||
+          barber.profile.full_name.toLowerCase().includes(action.payload.toLowerCase()) ||
           barber.services.some(service => 
             service.toLowerCase().includes(action.payload.toLowerCase())
           )
@@ -249,41 +245,26 @@ const barbersSlice = createSlice({
         state.updateLoading = false;
         state.currentBarber = action.payload;
         
-        // Convert BarberWithProfile to Barber for the public list
-        const publicBarber: Barber = {
-          id: action.payload.id,
-          shop_name: action.payload.shop_name,
-          address: action.payload.address,
-          description: action.payload.description,
-          services: action.payload.services,
-          working_hours: action.payload.working_hours,
-          price_range: action.payload.price_range,
-          shop_status: action.payload.shop_status,
-          profile_id: action.payload.profile_id,
-          appointment_duration: action.payload.appointment_duration,
-          barber_full_name: action.payload.profile.full_name,
-          role: 'barber'
-        };
-        
         // Update the barber in the list
         const index = state.barbers.findIndex(b => b.id === action.payload.id);
         if (index >= 0) {
-          state.barbers[index] = publicBarber;
+          state.barbers[index] = action.payload;
         } else {
-          state.barbers.push(publicBarber);
+          state.barbers.push(action.payload);
         }
         
         // Update filtered barbers
         const filteredIndex = state.filteredBarbers.findIndex(b => b.id === action.payload.id);
         if (filteredIndex >= 0) {
-          state.filteredBarbers[filteredIndex] = publicBarber;
+          state.filteredBarbers[filteredIndex] = action.payload;
         } else if (state.searchTerm === '' || 
           action.payload.shop_name.toLowerCase().includes(state.searchTerm.toLowerCase()) ||
           action.payload.address?.toLowerCase().includes(state.searchTerm.toLowerCase()) ||
+          action.payload.profile.full_name.toLowerCase().includes(state.searchTerm.toLowerCase()) ||
           action.payload.services.some(service => 
             service.toLowerCase().includes(state.searchTerm.toLowerCase())
           )) {
-          state.filteredBarbers.push(publicBarber);
+          state.filteredBarbers.push(action.payload);
         }
       })
       .addCase(createOrUpdateBarberProfile.rejected, (state, action) => {

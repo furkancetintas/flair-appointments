@@ -63,13 +63,6 @@ export type Database = {
             referencedColumns: ["id"]
           },
           {
-            foreignKeyName: "appointments_barber_id_fkey"
-            columns: ["barber_id"]
-            isOneToOne: false
-            referencedRelation: "barbers_public"
-            referencedColumns: ["id"]
-          },
-          {
             foreignKeyName: "appointments_customer_id_fkey"
             columns: ["customer_id"]
             isOneToOne: false
@@ -199,33 +192,7 @@ export type Database = {
       }
     }
     Views: {
-      barbers_public: {
-        Row: {
-          address: string | null
-          appointment_duration: number | null
-          barber_full_name: string | null
-          created_at: string | null
-          description: string | null
-          id: string | null
-          price_range: string | null
-          profile_id: string | null
-          role: string | null
-          services: string[] | null
-          shop_name: string | null
-          shop_status: string | null
-          updated_at: string | null
-          working_hours: Json | null
-        }
-        Relationships: [
-          {
-            foreignKeyName: "barbers_profile_id_fkey"
-            columns: ["profile_id"]
-            isOneToOne: true
-            referencedRelation: "profiles"
-            referencedColumns: ["id"]
-          },
-        ]
-      }
+      [_ in never]: never
     }
     Functions: {
       check_appointment_availability: {

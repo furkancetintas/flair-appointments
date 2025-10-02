@@ -124,6 +124,7 @@ export const createAppointment = createAsyncThunk(
     appointment_date: string;
     appointment_time: string;
     service: string;
+    price: number;
     notes?: string;
   }, { rejectWithValue }) => {
     try {
@@ -198,6 +199,34 @@ export const updateAppointmentStatus = createAsyncThunk(
     } catch (error: any) {
       console.error('Error updating appointment status:', error);
       toast.error('Randevu güncellenirken bir hata oluştu');
+      return rejectWithValue(error.message);
+    }
+  }
+);
+
+export const fetchAppointmentById = createAsyncThunk(
+  'appointments/fetchAppointmentById',
+  async (appointmentId: string, { rejectWithValue }) => {
+    try {
+      const { data, error } = await supabase
+        .from('appointments')
+        .select(`
+          *,
+          customer:profiles!customer_id(full_name, email, phone),
+          barber:barbers!barber_id(
+            shop_name,
+            address,
+            profile:profiles!profile_id(full_name, phone)
+          )
+        `)
+        .eq('id', appointmentId)
+        .single();
+
+      if (error) throw error;
+
+      return data;
+    } catch (error: any) {
+      console.error('Error fetching appointment:', error);
       return rejectWithValue(error.message);
     }
   }

@@ -29,7 +29,6 @@ const BarberProfile = () => {
   
   const [selectedDate, setSelectedDate] = useState<Date | undefined>(new Date());
   const [selectedTime, setSelectedTime] = useState<string>('');
-  const [selectedService, setSelectedService] = useState<string>('');
   const [notes, setNotes] = useState<string>('');
   const [bookedTimes, setBookedTimes] = useState<string[]>([]);
 
@@ -151,16 +150,22 @@ const BarberProfile = () => {
   };
 
   const handleBookAppointment = async () => {
-    if (!profile || !selectedDate || !selectedTime || !selectedService || !id) {
+    if (!profile || !selectedDate || !selectedTime || !id || !currentBarber) {
       return;
     }
+
+    // Parse price_range to get the average price
+    const priceRange = currentBarber.price_range || '100';
+    const prices = priceRange.split('-').map(p => parseFloat(p.trim()));
+    const averagePrice = prices.length === 2 ? (prices[0] + prices[1]) / 2 : prices[0];
 
     const appointmentData = {
       customer_id: profile.id,
       barber_id: id,
       appointment_date: format(selectedDate, 'yyyy-MM-dd'),
       appointment_time: selectedTime,
-      service: selectedService,
+      service: 'Genel',
+      price: averagePrice,
       notes: notes.trim() || undefined,
     };
 
@@ -169,7 +174,6 @@ const BarberProfile = () => {
     if (result.meta.requestStatus === 'fulfilled') {
       // Reset form
       setSelectedTime('');
-      setSelectedService('');
       setNotes('');
       
       // Refresh booked times for the selected date
@@ -354,27 +358,8 @@ const BarberProfile = () => {
                   </div>
                 )}
 
-                {/* Service Selection */}
-                {selectedTime && (
-                  <div>
-                    <Label className="text-base font-semibold">Hizmet Seçin</Label>
-                    <Select value={selectedService} onValueChange={setSelectedService}>
-                      <SelectTrigger className="mt-2">
-                        <SelectValue placeholder="Hizmet seçin" />
-                      </SelectTrigger>
-                      <SelectContent>
-                        {currentBarber.services.map((service) => (
-                          <SelectItem key={service} value={service}>
-                            {service}
-                          </SelectItem>
-                        ))}
-                      </SelectContent>
-                    </Select>
-                  </div>
-                )}
-
                 {/* Notes */}
-                {selectedService && (
+                {selectedTime && (
                   <div>
                     <Label htmlFor="notes" className="text-base font-semibold">
                       Notlar (Opsiyonel)
@@ -390,7 +375,7 @@ const BarberProfile = () => {
                 )}
 
                 {/* Book Button */}
-                {selectedDate && selectedTime && selectedService && (
+                {selectedDate && selectedTime && (
                   <Button 
                     onClick={handleBookAppointment}
                     disabled={bookingLoading || !profile}

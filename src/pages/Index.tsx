@@ -1,8 +1,65 @@
+import { useState } from 'react';
 import { Link } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
-import { Scissors, Calendar, Users, Star, ArrowRight } from 'lucide-react';
+import { Input } from '@/components/ui/input';
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
+import { Scissors, Calendar, Users, Star, ArrowRight, Search } from 'lucide-react';
+import { useAppDispatch } from '@/hooks/useAppDispatch';
+import { fetchAppointmentById } from '@/store/slices/appointmentsSlice';
+import { format } from 'date-fns';
+import { tr } from 'date-fns/locale';
+import { toast } from 'sonner';
 
 const Index = () => {
+  const dispatch = useAppDispatch();
+  const [appointmentId, setAppointmentId] = useState('');
+  const [isModalOpen, setIsModalOpen] = useState(false);
+  const [appointmentData, setAppointmentData] = useState<any>(null);
+  const [loading, setLoading] = useState(false);
+
+  const handleSearchAppointment = async () => {
+    if (!appointmentId.trim()) {
+      toast.error('Lütfen bir randevu ID girin');
+      return;
+    }
+
+    setLoading(true);
+    try {
+      const result = await dispatch(fetchAppointmentById(appointmentId.trim()));
+      
+      if (result.meta.requestStatus === 'fulfilled') {
+        setAppointmentData(result.payload);
+        setIsModalOpen(true);
+      } else {
+        toast.error('Randevu bulunamadı');
+      }
+    } catch (error) {
+      toast.error('Randevu bulunamadı');
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const getStatusText = (status: string) => {
+    switch (status) {
+      case 'pending': return 'Beklemede';
+      case 'confirmed': return 'Onaylandı';
+      case 'cancelled': return 'İptal Edildi';
+      case 'completed': return 'Tamamlandı';
+      default: return status;
+    }
+  };
+
+  const getStatusColor = (status: string) => {
+    switch (status) {
+      case 'pending': return 'text-yellow-600';
+      case 'confirmed': return 'text-green-600';
+      case 'cancelled': return 'text-red-600';
+      case 'completed': return 'text-blue-600';
+      default: return 'text-gray-600';
+    }
+  };
+
   return (
     <div className="min-h-screen bg-gradient-to-br from-background via-secondary/30 to-accent/20">
       {/* Hero Section */}
@@ -39,8 +96,82 @@ const Index = () => {
               </Button>
             </Link>
           </div>
+
+          {/* Appointment Search */}
+          <div className="mt-12 max-w-lg mx-auto">
+            <div className="bg-card border border-border rounded-lg p-6">
+              <h3 className="text-xl font-semibold mb-4 text-center">Randevunuzu Sorgulayın</h3>
+              <p className="text-muted-foreground text-sm mb-4 text-center">
+                Randevu ID'nizi girerek randevu bilgilerinizi görüntüleyin
+              </p>
+              <div className="flex gap-2">
+                <Input
+                  type="text"
+                  placeholder="Randevu ID'nizi girin"
+                  value={appointmentId}
+                  onChange={(e) => setAppointmentId(e.target.value)}
+                  onKeyDown={(e) => e.key === 'Enter' && handleSearchAppointment()}
+                />
+                <Button onClick={handleSearchAppointment} disabled={loading}>
+                  <Search className="h-4 w-4" />
+                </Button>
+              </div>
+            </div>
+          </div>
         </div>
       </div>
+
+      {/* Appointment Details Modal */}
+      <Dialog open={isModalOpen} onOpenChange={setIsModalOpen}>
+        <DialogContent className="max-w-md">
+          <DialogHeader>
+            <DialogTitle>Randevu Detayları</DialogTitle>
+          </DialogHeader>
+          {appointmentData && (
+            <div className="space-y-4">
+              <div>
+                <p className="text-sm text-muted-foreground">Randevu ID</p>
+                <p className="font-medium">{appointmentData.id}</p>
+              </div>
+              <div>
+                <p className="text-sm text-muted-foreground">Durum</p>
+                <p className={`font-medium ${getStatusColor(appointmentData.status)}`}>
+                  {getStatusText(appointmentData.status)}
+                </p>
+              </div>
+              <div>
+                <p className="text-sm text-muted-foreground">Berber</p>
+                <p className="font-medium">{appointmentData.barber?.shop_name}</p>
+                <p className="text-sm">{appointmentData.barber?.profile?.full_name}</p>
+              </div>
+              <div>
+                <p className="text-sm text-muted-foreground">Adres</p>
+                <p className="text-sm">{appointmentData.barber?.address}</p>
+              </div>
+              <div>
+                <p className="text-sm text-muted-foreground">Tarih ve Saat</p>
+                <p className="font-medium">
+                  {format(new Date(appointmentData.appointment_date), 'dd MMMM yyyy', { locale: tr })} - {appointmentData.appointment_time}
+                </p>
+              </div>
+              <div>
+                <p className="text-sm text-muted-foreground">Müşteri</p>
+                <p className="font-medium">{appointmentData.customer?.full_name}</p>
+              </div>
+              {appointmentData.notes && (
+                <div>
+                  <p className="text-sm text-muted-foreground">Notlar</p>
+                  <p className="text-sm">{appointmentData.notes}</p>
+                </div>
+              )}
+              <div>
+                <p className="text-sm text-muted-foreground">İletişim</p>
+                <p className="text-sm">{appointmentData.barber?.profile?.phone}</p>
+              </div>
+            </div>
+          )}
+        </DialogContent>
+      </Dialog>
 
       {/* Features Section */}
       <div className="container mx-auto px-4 py-16">

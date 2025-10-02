@@ -100,7 +100,7 @@ const Barbers = () => {
                         {barber.shop_name}
                       </CardTitle>
                       <CardDescription className="mt-1">
-                        {barber.barber_full_name}
+                        {barber.profile.full_name}
                       </CardDescription>
                     </div>
                     {barber.price_range && (
