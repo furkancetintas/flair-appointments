@@ -229,7 +229,7 @@ const Index = () => {
               </Button>
             </Link>
             <Link to="/auth">
-              <Button variant="outline" size="lg" className="text-lg px-8 py-4 border-primary-foreground text-primary-foreground hover:bg-primary-foreground hover:text-primary">
+              <Button variant="ghost" size="lg" className="text-lg px-8 py-4 border-primary-foreground text-primary-foreground hover:bg-primary-foreground hover:text-primary">
                 Berber Kaydı
               </Button>
             </Link>

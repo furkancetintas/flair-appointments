@@ -97,7 +97,7 @@ const BarberProfileForm = ({ profileId }: BarberProfileFormProps) => {
           services: data.services || [],
           working_hours: (data.working_hours as any) || defaultWorkingHours,
           shop_status: (data.shop_status as 'open' | 'closed') || 'closed',
-          price_range: data.price_range || '50-150'
+          price_range: data.price_range || '100'
         };
         setBarberProfile(barberData);
         reset(barberData);
@@ -110,7 +110,7 @@ const BarberProfileForm = ({ profileId }: BarberProfileFormProps) => {
           services: [],
           working_hours: defaultWorkingHours,
           shop_status: 'closed',
-          price_range: '50-150'
+          price_range: '100'
         });
       }
     } catch (error) {
