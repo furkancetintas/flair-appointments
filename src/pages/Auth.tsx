@@ -39,6 +39,7 @@ const Auth = () => {
     const { error } = await signIn(loginForm.email, loginForm.password);
     
     if (!error) {
+      // Navigation will be handled by AuthRoute based on role
       navigate('/');
     }
     

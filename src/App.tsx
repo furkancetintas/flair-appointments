@@ -8,7 +8,7 @@ import { AuthProvider, useAuth } from "@/hooks/useAuth";
 import { store } from "@/store";
 import Index from "./pages/Index";
 import Auth from "./pages/Auth";
-import Dashboard from "./pages/Dashboard";
+import MyAppointments from "./pages/MyAppointments";
 import Barbers from "./pages/Barbers";
 import BarberProfile from "./pages/BarberProfile";
 import NotFound from "./pages/NotFound";
@@ -48,7 +48,7 @@ function ProtectedRoute({ children }: { children: React.ReactNode }) {
 }
 
 function AuthRoute({ children }: { children: React.ReactNode }) {
-  const { user, loading } = useAuth();
+  const { user, profile, loading } = useAuth();
   
   if (loading) {
     return (
@@ -59,7 +59,11 @@ function AuthRoute({ children }: { children: React.ReactNode }) {
   }
   
   if (user) {
-    return <Navigate to="/dashboard" replace />;
+    // Redirect based on role
+    if (profile?.role === 'barber') {
+      return <Navigate to="/admin/earnings" replace />;
+    }
+    return <Navigate to="/my-appointments" replace />;
   }
   
   return <>{children}</>;
@@ -70,7 +74,7 @@ function AppRoutes() {
     <Routes>
       <Route path="/" element={<Index />} />
       <Route path="/auth" element={<AuthRoute><Auth /></AuthRoute>} />
-      <Route path="/dashboard" element={<ProtectedRoute><Dashboard /></ProtectedRoute>} />
+      <Route path="/my-appointments" element={<ProtectedRoute><MyAppointments /></ProtectedRoute>} />
       <Route path="/barbers" element={<ProtectedRoute><Barbers /></ProtectedRoute>} />
       <Route path="/barber/:id" element={<ProtectedRoute><BarberProfile /></ProtectedRoute>} />
       
