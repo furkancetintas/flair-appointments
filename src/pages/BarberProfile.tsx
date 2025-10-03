@@ -111,13 +111,25 @@ const BarberProfile = () => {
     const endHour = parseInt(endTime.split(':')[0]);
     const endMinute = parseInt(endTime.split(':')[1]);
 
+    // If today, filter out past times
+    const now = new Date();
+    const currentTimeHour = now.getHours();
+    const currentTimeMinute = now.getMinutes();
+    const isTodaySelected = isToday(selectedDate);
+
     while (currentHour < endHour || (currentHour === endHour && currentMinute < endMinute)) {
       const timeString = `${currentHour.toString().padStart(2, '0')}:${currentMinute.toString().padStart(2, '0')}`;
       
       // Check if this time slot is already booked
       const isBooked = bookedTimes.includes(timeString);
 
-      if (!isBooked) {
+      // If today, skip past times
+      const isPastTime = isTodaySelected && (
+        currentHour < currentTimeHour || 
+        (currentHour === currentTimeHour && currentMinute <= currentTimeMinute)
+      );
+
+      if (!isBooked && !isPastTime) {
         slots.push(timeString);
       }
 
@@ -172,6 +184,19 @@ const BarberProfile = () => {
     const result = await dispatch(createAppointment(appointmentData));
     
     if (result.meta.requestStatus === 'fulfilled') {
+      const appointmentId = (result.payload as any)?.id;
+      
+      // Show success message with appointment ID
+      if (appointmentId) {
+        const successMessage = `Randevunuz oluşturuldu! Randevu ID: ${appointmentId}`;
+        import('sonner').then(({ toast }) => {
+          toast.success(successMessage, {
+            description: 'Randevu bilgilerinizi ana sayfadan ID ile sorgulayabilirsiniz.',
+            duration: 8000,
+          });
+        });
+      }
+      
       // Reset form
       setSelectedTime('');
       setNotes('');

@@ -7,10 +7,8 @@ import { fetchBarberByProfileId } from '@/store/slices/barbersSlice';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { Calendar, Clock, User, Scissors, LogOut, Settings, Shield } from 'lucide-react';
+import { Calendar, Clock, User, Scissors, LogOut, Shield } from 'lucide-react';
 import { Link } from 'react-router-dom';
-import BarberProfileForm from '@/components/BarberProfileForm';
 
 const Dashboard = () => {
   const { profile, signOut } = useAuth();
@@ -106,100 +104,79 @@ const Dashboard = () => {
 
         {/* Content based on user role */}
         {profile?.role === 'barber' ? (
-          <Tabs defaultValue="appointments" className="space-y-6">
-            <TabsList className="grid w-full grid-cols-2">
-              <TabsTrigger value="appointments" className="flex items-center gap-2">
-                <Calendar className="h-4 w-4" />
-                Randevular
-              </TabsTrigger>
-              <TabsTrigger value="profile" className="flex items-center gap-2">
-                <Settings className="h-4 w-4" />
-                Profil Ayarları
-              </TabsTrigger>
-            </TabsList>
+          <div className="space-y-6">
+            <div className="flex items-center gap-2">
+              <Calendar className="h-5 w-5 text-primary" />
+              <h2 className="text-xl font-semibold">Randevularım</h2>
+            </div>
 
-            <TabsContent value="appointments" className="space-y-6">
-              <div className="flex items-center gap-2">
-                <Calendar className="h-5 w-5 text-primary" />
-                <h2 className="text-xl font-semibold">Randevularım</h2>
-              </div>
-
-              {barberAppointments.length === 0 ? (
-                <Card>
-                  <CardContent className="flex flex-col items-center justify-center py-12">
-                    <Calendar className="h-12 w-12 text-muted-foreground mb-4" />
-                    <p className="text-muted-foreground text-center">
-                      Henüz hiç randevu yok.
-                    </p>
-                  </CardContent>
-                </Card>
-              ) : (
-                <div className="grid gap-4">
-                  {barberAppointments.map((appointment) => (
-                    <Card key={appointment.id}>
-                      <CardHeader>
-                        <div className="flex justify-between items-start">
-                          <div>
-                            <CardTitle className="flex items-center gap-2">
-                              <Clock className="h-4 w-4" />
-                              {new Date(appointment.appointment_date).toLocaleDateString('tr-TR')} - {appointment.appointment_time}
-                            </CardTitle>
-                            <CardDescription>
-                              {appointment.service}
-                            </CardDescription>
-                          </div>
-                          <Badge className={getStatusColor(appointment.status)}>
-                            {getStatusText(appointment.status)}
-                          </Badge>
+            {barberAppointments.length === 0 ? (
+              <Card>
+                <CardContent className="flex flex-col items-center justify-center py-12">
+                  <Calendar className="h-12 w-12 text-muted-foreground mb-4" />
+                  <p className="text-muted-foreground text-center">
+                    Henüz hiç randevu yok.
+                  </p>
+                </CardContent>
+              </Card>
+            ) : (
+              <div className="grid gap-4">
+                {barberAppointments.map((appointment) => (
+                  <Card key={appointment.id}>
+                    <CardHeader>
+                      <div className="flex justify-between items-start">
+                        <div>
+                          <CardTitle className="flex items-center gap-2">
+                            <Clock className="h-4 w-4" />
+                            {new Date(appointment.appointment_date).toLocaleDateString('tr-TR')} - {appointment.appointment_time}
+                          </CardTitle>
+                          <CardDescription>
+                            {appointment.service}
+                          </CardDescription>
                         </div>
-                      </CardHeader>
-                      <CardContent>
-                        <div className="space-y-2">
-                          <div className="flex items-center gap-2">
-                            <User className="h-4 w-4 text-muted-foreground" />
-                            <span className="font-medium">{appointment.customer?.full_name}</span>
-                            <span className="text-muted-foreground">- {appointment.customer?.email}</span>
-                          </div>
-                          
-                          {appointment.notes && (
-                            <p className="text-sm text-muted-foreground mt-2">
-                              <strong>Not:</strong> {appointment.notes}
-                            </p>
-                          )}
-
-                          {appointment.status === 'pending' && (
-                            <div className="flex gap-2 mt-4">
-                              <Button 
-                                size="sm"
-                                onClick={() => handleUpdateAppointmentStatus(appointment.id, 'confirmed')}
-                              >
-                                Onayla
-                              </Button>
-                              <Button 
-                                variant="outline" 
-                                size="sm"
-                                onClick={() => handleUpdateAppointmentStatus(appointment.id, 'cancelled')}
-                              >
-                                İptal Et
-                              </Button>
-                            </div>
-                          )}
+                        <Badge className={getStatusColor(appointment.status)}>
+                          {getStatusText(appointment.status)}
+                        </Badge>
+                      </div>
+                    </CardHeader>
+                    <CardContent>
+                      <div className="space-y-2">
+                        <div className="flex items-center gap-2">
+                          <User className="h-4 w-4 text-muted-foreground" />
+                          <span className="font-medium">{appointment.customer?.full_name}</span>
+                          <span className="text-muted-foreground">- {appointment.customer?.email}</span>
                         </div>
-                      </CardContent>
-                    </Card>
-                  ))}
-                </div>
-              )}
-            </TabsContent>
+                        
+                        {appointment.notes && (
+                          <p className="text-sm text-muted-foreground mt-2">
+                            <strong>Not:</strong> {appointment.notes}
+                          </p>
+                        )}
 
-            <TabsContent value="profile" className="space-y-6">
-              <div className="flex items-center gap-2">
-                <Settings className="h-5 w-5 text-primary" />
-                <h2 className="text-xl font-semibold">Berber Profili</h2>
+                        {appointment.status === 'pending' && (
+                          <div className="flex gap-2 mt-4">
+                            <Button 
+                              size="sm"
+                              onClick={() => handleUpdateAppointmentStatus(appointment.id, 'confirmed')}
+                            >
+                              Onayla
+                            </Button>
+                            <Button 
+                              variant="outline" 
+                              size="sm"
+                              onClick={() => handleUpdateAppointmentStatus(appointment.id, 'cancelled')}
+                            >
+                              İptal Et
+                            </Button>
+                          </div>
+                        )}
+                      </div>
+                    </CardContent>
+                  </Card>
+                ))}
               </div>
-              <BarberProfileForm profileId={profile.id} />
-            </TabsContent>
-          </Tabs>
+            )}
+          </div>
         ) : (
           // Customer view
           <div className="space-y-6">

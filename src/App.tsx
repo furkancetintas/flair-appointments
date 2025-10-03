@@ -18,6 +18,7 @@ import AdminAppointments from "./pages/admin/AdminAppointments";
 import AdminServices from "./pages/admin/AdminServices";
 import AdminWorkingHours from "./pages/admin/AdminWorkingHours";
 import AdminShopStatus from "./pages/admin/AdminShopStatus";
+import AdminSettings from "./pages/admin/AdminSettings";
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -79,6 +80,7 @@ function AppRoutes() {
       <Route path="/admin/services" element={<ProtectedRoute><AdminLayout><AdminServices /></AdminLayout></ProtectedRoute>} />
       <Route path="/admin/working-hours" element={<ProtectedRoute><AdminLayout><AdminWorkingHours /></AdminLayout></ProtectedRoute>} />
       <Route path="/admin/shop-status" element={<ProtectedRoute><AdminLayout><AdminShopStatus /></AdminLayout></ProtectedRoute>} />
+      <Route path="/admin/settings" element={<ProtectedRoute><AdminLayout><AdminSettings /></AdminLayout></ProtectedRoute>} />
       
       {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
       <Route path="*" element={<NotFound />} />

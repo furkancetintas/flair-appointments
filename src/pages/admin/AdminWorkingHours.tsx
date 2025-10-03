@@ -90,7 +90,7 @@ export default function AdminWorkingHours() {
     if (!profile?.id || !currentBarber) return;
 
     try {
-      await dispatch(createOrUpdateBarberProfile({
+      const result = await dispatch(createOrUpdateBarberProfile({
         profileId: profile.id,
         barberData: {
           shop_name: currentBarber.shop_name,
@@ -103,7 +103,12 @@ export default function AdminWorkingHours() {
           appointment_duration: appointmentInterval,
         }
       }));
-      toast.success("Çalışma saatleri başarıyla güncellendi!");
+      
+      if (result.meta.requestStatus === 'fulfilled') {
+        toast.success("Çalışma saatleri başarıyla güncellendi!");
+      } else {
+        toast.error("Çalışma saatleri güncellenirken bir hata oluştu");
+      }
     } catch (error) {
       toast.error("Çalışma saatleri güncellenirken bir hata oluştu");
     }
@@ -113,7 +118,7 @@ export default function AdminWorkingHours() {
     if (!profile?.id || !currentBarber) return;
 
     try {
-      await dispatch(createOrUpdateBarberProfile({
+      const result = await dispatch(createOrUpdateBarberProfile({
         profileId: profile.id,
         barberData: {
           shop_name: currentBarber.shop_name,
@@ -126,7 +131,12 @@ export default function AdminWorkingHours() {
           appointment_duration: appointmentInterval,
         }
       }));
-      toast.success("Randevu ayarları başarıyla güncellendi!");
+      
+      if (result.meta.requestStatus === 'fulfilled') {
+        toast.success("Randevu ayarları başarıyla güncellendi!");
+      } else {
+        toast.error("Randevu ayarları güncellenirken bir hata oluştu");
+      }
     } catch (error) {
       toast.error("Randevu ayarları güncellenirken bir hata oluştu");
     }

@@ -6,7 +6,8 @@ import {
   Clock, 
   Store,
   User,
-  LogOut
+  LogOut,
+  Settings
 } from "lucide-react";
 import { useAuth } from "@/hooks/useAuth";
 import {
@@ -31,6 +32,7 @@ const adminMenuItems = [
   { title: "Hizmetler", url: "/admin/services", icon: Wrench },
   { title: "Çalışma Saatleri", url: "/admin/working-hours", icon: Clock },
   { title: "Dükkan Durum", url: "/admin/shop-status", icon: Store },
+  { title: "Ayarlarım", url: "/admin/settings", icon: Settings },
 ];
 
 export function AdminSidebar() {
