@@ -156,7 +156,7 @@ export default function AdminEarnings() {
     
     return (
       <div className="flex items-end gap-1 h-32">
-        <div className="flex flex-col justify-end h-full w-8 md:w-16">
+        <div className="flex flex-col justify-end h-full w-8 lg:w-16">
           <div 
             className="bg-primary rounded-t-md transition-all duration-300 min-h-[4px] flex items-end justify-center pb-2"
             style={{ height: `${percentage}%` }}
