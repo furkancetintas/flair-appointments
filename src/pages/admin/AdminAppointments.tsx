@@ -37,10 +37,28 @@ export default function AdminAppointments() {
 
   // Filter appointments by selected date
   const filteredAppointments = useMemo(() => {
+    console.log('Filtering appointments:', { 
+      totalAppointments: barberAppointments.length,
+      selectedDate: format(selectedDate, 'yyyy-MM-dd'),
+      appointments: barberAppointments.map(a => ({
+        id: a.id,
+        date: a.appointment_date,
+        customer: a.customer?.full_name
+      }))
+    });
+    
     return barberAppointments.filter(appointment => {
-      const appointmentDate = format(new Date(appointment.appointment_date), 'yyyy-MM-dd');
+      // Direct string comparison since appointment_date is already in 'YYYY-MM-DD' format
       const selected = format(selectedDate, 'yyyy-MM-dd');
-      return appointmentDate === selected;
+      const matches = appointment.appointment_date === selected;
+      
+      console.log('Date comparison:', {
+        appointmentDate: appointment.appointment_date,
+        selectedDate: selected,
+        matches
+      });
+      
+      return matches;
     });
   }, [barberAppointments, selectedDate]);
 
