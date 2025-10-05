@@ -14,22 +14,33 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
+import { Calendar as CalendarComponent } from "@/components/ui/calendar";
+import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { Calendar, Clock, User, CheckCircle, XCircle } from "lucide-react";
 import { format } from "date-fns";
 import { tr } from "date-fns/locale";
 import { toast } from "sonner";
+import { cn } from "@/lib/utils";
 
 export default function AdminAppointments() {
   const dispatch = useAppDispatch();
   const { profile } = useAuth();
   const { barberAppointments, loading } = useAppSelector((state) => state.appointments);
   const { currentBarber } = useAppSelector((state) => state.barbers);
+  const [selectedDate, setSelectedDate] = useState<Date>(new Date());
 
   useEffect(() => {
     if (currentBarber?.id) {
       dispatch(fetchBarberAppointments(currentBarber.id));
     }
   }, [dispatch, currentBarber?.id]);
+
+  // Filter appointments by selected date
+  const filteredAppointments = barberAppointments.filter(appointment => {
+    const appointmentDate = format(new Date(appointment.appointment_date), 'yyyy-MM-dd');
+    const selected = format(selectedDate, 'yyyy-MM-dd');
+    return appointmentDate === selected;
+  });
 
   const handleStatusUpdate = async (appointmentId: string, newStatus: string) => {
     try {
@@ -73,11 +84,11 @@ export default function AdminAppointments() {
       <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
         <Card>
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Toplam Randevu</CardTitle>
+            <CardTitle className="text-sm font-medium">Bugünkü Randevular</CardTitle>
             <Calendar className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">{barberAppointments.length}</div>
+            <div className="text-2xl font-bold">{filteredAppointments.length}</div>
           </CardContent>
         </Card>
 
@@ -88,7 +99,7 @@ export default function AdminAppointments() {
           </CardHeader>
           <CardContent>
             <div className="text-2xl font-bold">
-              {barberAppointments.filter(app => app.status === 'pending').length}
+              {filteredAppointments.filter(app => app.status === 'pending').length}
             </div>
           </CardContent>
         </Card>
@@ -100,7 +111,7 @@ export default function AdminAppointments() {
           </CardHeader>
           <CardContent>
             <div className="text-2xl font-bold">
-              {barberAppointments.filter(app => app.status === 'confirmed').length}
+              {filteredAppointments.filter(app => app.status === 'confirmed').length}
             </div>
           </CardContent>
         </Card>
@@ -112,7 +123,7 @@ export default function AdminAppointments() {
           </CardHeader>
           <CardContent>
             <div className="text-2xl font-bold">
-              {barberAppointments.filter(app => app.status === 'cancelled').length}
+              {filteredAppointments.filter(app => app.status === 'cancelled').length}
             </div>
           </CardContent>
         </Card>
@@ -121,10 +132,38 @@ export default function AdminAppointments() {
       {/* Appointments Table */}
       <Card>
         <CardHeader>
-          <CardTitle>Randevu Listesi</CardTitle>
-          <CardDescription>
-            Tüm randevuları görüntüleyin ve yönetin
-          </CardDescription>
+          <div className="flex items-center justify-between">
+            <div>
+              <CardTitle>Randevu Listesi</CardTitle>
+              <CardDescription>
+                Seçili tarihteki randevuları görüntüleyin ve yönetin
+              </CardDescription>
+            </div>
+            <Popover>
+              <PopoverTrigger asChild>
+                <Button
+                  variant="outline"
+                  className={cn(
+                    "justify-start text-left font-normal",
+                    !selectedDate && "text-muted-foreground"
+                  )}
+                >
+                  <Calendar className="mr-2 h-4 w-4" />
+                  {format(selectedDate, 'dd MMMM yyyy', { locale: tr })}
+                </Button>
+              </PopoverTrigger>
+              <PopoverContent className="w-auto p-0" align="end">
+                <CalendarComponent
+                  mode="single"
+                  selected={selectedDate}
+                  onSelect={(date) => date && setSelectedDate(date)}
+                  initialFocus
+                  locale={tr}
+                  className="pointer-events-auto"
+                />
+              </PopoverContent>
+            </Popover>
+          </div>
         </CardHeader>
         <CardContent>
           <div className="overflow-x-auto">
@@ -141,24 +180,26 @@ export default function AdminAppointments() {
                 </TableRow>
               </TableHeader>
               <TableBody>
-                {barberAppointments.length === 0 ? (
+                {filteredAppointments.length === 0 ? (
                   <TableRow>
                     <TableCell colSpan={7} className="text-center py-8">
                       <div className="flex flex-col items-center gap-2">
                         <Calendar className="h-8 w-8 text-muted-foreground" />
-                        <p className="text-muted-foreground">Henüz randevu bulunmamaktadır</p>
+                        <p className="text-muted-foreground">
+                          {format(selectedDate, 'dd MMMM yyyy', { locale: tr })} tarihinde randevu bulunmamaktadır
+                        </p>
                       </div>
                     </TableCell>
                   </TableRow>
                 ) : (
-                  barberAppointments.map((appointment) => (
+                  filteredAppointments.map((appointment) => (
                     <TableRow key={appointment.id}>
                       <TableCell>
                         <div className="flex items-center gap-2">
                           <User className="h-4 w-4" />
                           <div>
-                            <p className="font-medium">Müşteri #{appointment.customer_id.slice(0, 8)}</p>
-                            <p className="text-sm text-muted-foreground">Randevu ID: {appointment.id.slice(0, 8)}</p>
+                            <p className="font-medium">{appointment.customer?.full_name || 'İsimsiz Müşteri'}</p>
+                            <p className="text-sm text-muted-foreground">{appointment.customer?.email}</p>
                           </div>
                         </div>
                       </TableCell>
