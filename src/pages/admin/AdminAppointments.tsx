@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useState, useMemo } from "react";
 import { useAppDispatch } from "@/hooks/useAppDispatch";
 import { useAppSelector } from "@/hooks/useAppSelector";
 import { fetchBarberAppointments, updateAppointmentStatus } from "@/store/slices/appointmentsSlice";
@@ -36,11 +36,13 @@ export default function AdminAppointments() {
   }, [dispatch, currentBarber?.id]);
 
   // Filter appointments by selected date
-  const filteredAppointments = barberAppointments.filter(appointment => {
-    const appointmentDate = format(new Date(appointment.appointment_date), 'yyyy-MM-dd');
-    const selected = format(selectedDate, 'yyyy-MM-dd');
-    return appointmentDate === selected;
-  });
+  const filteredAppointments = useMemo(() => {
+    return barberAppointments.filter(appointment => {
+      const appointmentDate = format(new Date(appointment.appointment_date), 'yyyy-MM-dd');
+      const selected = format(selectedDate, 'yyyy-MM-dd');
+      return appointmentDate === selected;
+    });
+  }, [barberAppointments, selectedDate]);
 
   const handleStatusUpdate = async (appointmentId: string, newStatus: string) => {
     try {
