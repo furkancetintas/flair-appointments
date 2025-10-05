@@ -186,7 +186,7 @@ export default function AdminAppointments() {
           </div>
         </CardHeader>
         <CardContent>
-          <div className="overflow-x-auto">
+          <div className="">
             <Table>
               <TableHeader>
                 <TableRow>
