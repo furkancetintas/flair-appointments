@@ -191,9 +191,7 @@ export default function AdminAppointments() {
               <TableHeader>
                 <TableRow>
                   <TableHead>Müşteri</TableHead>
-                  <TableHead>Tarih</TableHead>
-                  <TableHead>Saat</TableHead>
-                  <TableHead>Hizmet</TableHead>
+                  <TableHead>Tarih/Saat</TableHead>
                   <TableHead>Durum</TableHead>
                   <TableHead>Notlar</TableHead>
                   <TableHead>İşlemler</TableHead>
@@ -224,12 +222,8 @@ export default function AdminAppointments() {
                         </div>
                       </TableCell>
                       <TableCell>
-                        {format(new Date(appointment.appointment_date), 'dd MMMM yyyy', { locale: tr })}
+                        {format(new Date(appointment.appointment_date), 'dd MMMM yyyy', { locale: tr })} / {appointment.appointment_time}
                       </TableCell>
-                      <TableCell>
-                        {appointment.appointment_time}
-                      </TableCell>
-                      <TableCell>{appointment.service}</TableCell>
                       <TableCell>{getStatusBadge(appointment.status)}</TableCell>
                       <TableCell>
                         <span className="text-sm">{appointment.notes || '-'}</span>
