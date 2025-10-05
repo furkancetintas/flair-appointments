@@ -13,7 +13,8 @@ import { Textarea } from '@/components/ui/textarea';
 import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Calendar } from '@/components/ui/calendar';
-import { MapPin, Clock, Phone, Mail, ArrowLeft, Calendar as CalendarIcon } from 'lucide-react';
+import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from '@/components/ui/dialog';
+import { MapPin, Clock, Phone, Mail, ArrowLeft, Calendar as CalendarIcon, CheckCircle } from 'lucide-react';
 import { format, addDays, isToday, isTomorrow } from 'date-fns';
 import { tr } from 'date-fns/locale';
 
@@ -31,6 +32,8 @@ const BarberProfile = () => {
   const [selectedTime, setSelectedTime] = useState<string>('');
   const [notes, setNotes] = useState<string>('');
   const [bookedTimes, setBookedTimes] = useState<string[]>([]);
+  const [showConfirmDialog, setShowConfirmDialog] = useState(false);
+  const [confirmedAppointment, setConfirmedAppointment] = useState<any>(null);
 
   useEffect(() => {
     if (id) {
@@ -184,18 +187,11 @@ const BarberProfile = () => {
     const result = await dispatch(createAppointment(appointmentData));
     
     if (result.meta.requestStatus === 'fulfilled') {
-      const appointmentId = (result.payload as any)?.id;
+      const appointment = result.payload as any;
       
-      // Show success message with appointment ID
-      if (appointmentId) {
-        const successMessage = `Randevunuz oluşturuldu! Randevu ID: ${appointmentId}`;
-        import('sonner').then(({ toast }) => {
-          toast.success(successMessage, {
-            description: 'Randevu bilgilerinizi ana sayfadan ID ile sorgulayabilirsiniz.',
-            duration: 8000,
-          });
-        });
-      }
+      // Show confirmation dialog
+      setConfirmedAppointment(appointment);
+      setShowConfirmDialog(true);
       
       // Reset form
       setSelectedTime('');
@@ -414,6 +410,89 @@ const BarberProfile = () => {
             </Card>
           </div>
         </div>
+
+        {/* Confirmation Dialog */}
+        <Dialog open={showConfirmDialog} onOpenChange={setShowConfirmDialog}>
+          <DialogContent className="sm:max-w-md">
+            <DialogHeader>
+              <div className="flex items-center gap-2 mb-2">
+                <CheckCircle className="h-6 w-6 text-green-500" />
+                <DialogTitle>Randevu Başarıyla Oluşturuldu!</DialogTitle>
+              </div>
+              <DialogDescription>
+                Randevunuz başarıyla alındı. Aşağıdaki bilgileri kontrol edebilirsiniz.
+              </DialogDescription>
+            </DialogHeader>
+            
+            {confirmedAppointment && (
+              <div className="space-y-4 py-4">
+                <div className="space-y-3">
+                  <div className="flex items-center gap-2 p-3 bg-muted rounded-md">
+                    <CalendarIcon className="h-4 w-4 text-muted-foreground" />
+                    <div>
+                      <p className="text-sm font-medium">Tarih & Saat</p>
+                      <p className="text-sm">
+                        {format(new Date(confirmedAppointment.appointment_date), 'dd MMMM yyyy', { locale: tr })} - {confirmedAppointment.appointment_time}
+                      </p>
+                    </div>
+                  </div>
+
+                  <div className="p-3 bg-muted rounded-md space-y-2">
+                    <div className="flex items-start gap-2">
+                      <MapPin className="h-4 w-4 text-muted-foreground mt-1" />
+                      <div>
+                        <p className="text-sm font-medium">{confirmedAppointment.barber?.shop_name}</p>
+                        {confirmedAppointment.barber?.address && (
+                          <p className="text-sm text-muted-foreground">{confirmedAppointment.barber.address}</p>
+                        )}
+                      </div>
+                    </div>
+                    
+                    <div className="border-t pt-2 space-y-1">
+                      <p className="text-sm">
+                        <span className="font-medium">Berber:</span> {confirmedAppointment.barber?.profile.full_name}
+                      </p>
+                      {confirmedAppointment.barber?.profile.phone && (
+                        <p className="text-sm">
+                          <span className="font-medium">Telefon:</span> {confirmedAppointment.barber.profile.phone}
+                        </p>
+                      )}
+                    </div>
+                  </div>
+
+                  {confirmedAppointment.notes && (
+                    <div className="p-3 bg-muted rounded-md">
+                      <p className="text-sm font-medium mb-1">Not:</p>
+                      <p className="text-sm text-muted-foreground">{confirmedAppointment.notes}</p>
+                    </div>
+                  )}
+
+                  <div className="p-3 bg-primary/10 rounded-md">
+                    <p className="text-xs text-muted-foreground mb-1">Randevu ID</p>
+                    <p className="text-sm font-mono font-semibold">{confirmedAppointment.id}</p>
+                    <p className="text-xs text-muted-foreground mt-1">
+                      Bu ID ile randevunuzu sorgulayabilirsiniz
+                    </p>
+                  </div>
+                </div>
+
+                <div className="flex gap-2">
+                  <Button 
+                    onClick={() => setShowConfirmDialog(false)} 
+                    className="flex-1"
+                  >
+                    Tamam
+                  </Button>
+                  <Link to="/my-appointments" className="flex-1">
+                    <Button variant="outline" className="w-full">
+                      Randevularıma Git
+                    </Button>
+                  </Link>
+                </div>
+              </div>
+            )}
+          </DialogContent>
+        </Dialog>
       </div>
     </div>
   );

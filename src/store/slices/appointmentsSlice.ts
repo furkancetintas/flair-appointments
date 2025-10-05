@@ -20,6 +20,7 @@ export interface Appointment {
   };
   barber?: {
     shop_name: string;
+    address: string | null;
     profile: {
       full_name: string;
       email: string;
@@ -55,6 +56,7 @@ export const fetchCustomerAppointments = createAsyncThunk(
           *,
           barber:barbers!barber_id(
             shop_name,
+            address,
             profile:profiles!profile_id(full_name, email, phone)
           )
         `)
@@ -150,6 +152,7 @@ export const createAppointment = createAsyncThunk(
           *,
           barber:barbers!barber_id(
             shop_name,
+            address,
             profile:profiles!profile_id(full_name, email, phone)
           )
         `)

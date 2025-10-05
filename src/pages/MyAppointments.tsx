@@ -117,19 +117,41 @@ const MyAppointments = () => {
                     </div>
                   </CardHeader>
                   <CardContent>
-                    <div className="space-y-2">
-                      <div className="flex items-center gap-2">
-                        <Scissors className="h-4 w-4 text-muted-foreground" />
-                        <span className="font-medium">{appointment.barber?.shop_name}</span>
-                        {(appointment.barber as any)?.address && (
-                          <span className="text-muted-foreground">- {(appointment.barber as any).address}</span>
-                        )}
+                    <div className="space-y-4">
+                      <div className="grid gap-3">
+                        <div className="flex items-start gap-2">
+                          <Scissors className="h-4 w-4 text-muted-foreground mt-1" />
+                          <div>
+                            <p className="font-medium">{appointment.barber?.shop_name}</p>
+                            {appointment.barber?.address && (
+                              <p className="text-sm text-muted-foreground">{appointment.barber.address}</p>
+                            )}
+                          </div>
+                        </div>
+                        
+                        <div className="border-t pt-3 space-y-2">
+                          <p className="text-sm">
+                            <span className="font-medium">Berber:</span> {appointment.barber?.profile.full_name}
+                          </p>
+                          {appointment.barber?.profile.phone && (
+                            <p className="text-sm">
+                              <span className="font-medium">Telefon:</span> {appointment.barber.profile.phone}
+                            </p>
+                          )}
+                          {appointment.barber?.profile.email && (
+                            <p className="text-sm">
+                              <span className="font-medium">E-posta:</span> {appointment.barber.profile.email}
+                            </p>
+                          )}
+                        </div>
                       </div>
                       
                       {appointment.notes && (
-                        <p className="text-sm text-muted-foreground mt-2">
-                          <strong>Not:</strong> {appointment.notes}
-                        </p>
+                        <div className="border-t pt-3">
+                          <p className="text-sm">
+                            <span className="font-medium">Not:</span> {appointment.notes}
+                          </p>
+                        </div>
                       )}
                       
                       <div className="mt-4 p-3 bg-muted rounded-md">
