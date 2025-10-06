@@ -2,9 +2,10 @@ import { Toaster } from "@/components/ui/toaster";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
-import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
+import { BrowserRouter, Routes, Route, Navigate, useLocation } from "react-router-dom";
 import { Provider } from "react-redux";
 import { AuthProvider, useAuth } from "@/hooks/useAuth";
+import { Header } from "@/components/Header";
 import { store } from "@/store";
 import Index from "./pages/Index";
 import Auth from "./pages/Auth";
@@ -70,25 +71,32 @@ function AuthRoute({ children }: { children: React.ReactNode }) {
 }
 
 function AppRoutes() {
+  const location = useLocation();
+  const isAdminRoute = location.pathname.startsWith('/admin');
+  const isAuthRoute = location.pathname === '/auth';
+
   return (
-    <Routes>
-      <Route path="/" element={<Index />} />
-      <Route path="/auth" element={<AuthRoute><Auth /></AuthRoute>} />
-      <Route path="/my-appointments" element={<ProtectedRoute><MyAppointments /></ProtectedRoute>} />
-      <Route path="/barbers" element={<ProtectedRoute><Barbers /></ProtectedRoute>} />
-      <Route path="/barber/:id" element={<ProtectedRoute><BarberProfile /></ProtectedRoute>} />
-      
-      {/* Admin Routes */}
-      <Route path="/admin/earnings" element={<ProtectedRoute><AdminLayout><AdminEarnings /></AdminLayout></ProtectedRoute>} />
-      <Route path="/admin/appointments" element={<ProtectedRoute><AdminLayout><AdminAppointments /></AdminLayout></ProtectedRoute>} />
-      <Route path="/admin/services" element={<ProtectedRoute><AdminLayout><AdminServices /></AdminLayout></ProtectedRoute>} />
-      <Route path="/admin/working-hours" element={<ProtectedRoute><AdminLayout><AdminWorkingHours /></AdminLayout></ProtectedRoute>} />
-      <Route path="/admin/shop-status" element={<ProtectedRoute><AdminLayout><AdminShopStatus /></AdminLayout></ProtectedRoute>} />
-      <Route path="/admin/settings" element={<ProtectedRoute><AdminLayout><AdminSettings /></AdminLayout></ProtectedRoute>} />
-      
-      {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
-      <Route path="*" element={<NotFound />} />
-    </Routes>
+    <>
+      {!isAdminRoute && !isAuthRoute && <Header />}
+      <Routes>
+        <Route path="/" element={<Index />} />
+        <Route path="/auth" element={<AuthRoute><Auth /></AuthRoute>} />
+        <Route path="/my-appointments" element={<ProtectedRoute><MyAppointments /></ProtectedRoute>} />
+        <Route path="/barbers" element={<ProtectedRoute><Barbers /></ProtectedRoute>} />
+        <Route path="/barber/:id" element={<ProtectedRoute><BarberProfile /></ProtectedRoute>} />
+        
+        {/* Admin Routes */}
+        <Route path="/admin/earnings" element={<ProtectedRoute><AdminLayout><AdminEarnings /></AdminLayout></ProtectedRoute>} />
+        <Route path="/admin/appointments" element={<ProtectedRoute><AdminLayout><AdminAppointments /></AdminLayout></ProtectedRoute>} />
+        <Route path="/admin/services" element={<ProtectedRoute><AdminLayout><AdminServices /></AdminLayout></ProtectedRoute>} />
+        <Route path="/admin/working-hours" element={<ProtectedRoute><AdminLayout><AdminWorkingHours /></AdminLayout></ProtectedRoute>} />
+        <Route path="/admin/shop-status" element={<ProtectedRoute><AdminLayout><AdminShopStatus /></AdminLayout></ProtectedRoute>} />
+        <Route path="/admin/settings" element={<ProtectedRoute><AdminLayout><AdminSettings /></AdminLayout></ProtectedRoute>} />
+        
+        {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
+        <Route path="*" element={<NotFound />} />
+      </Routes>
+    </>
   );
 }
 
