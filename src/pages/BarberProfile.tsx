@@ -288,7 +288,7 @@ const BarberProfile = () => {
                       <span>{currentBarber.address}</span>
                     </div>
                     <a
-                      href={`https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(currentBarber.address)}`}
+                      href={`https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(currentBarber.shop_name+currentBarber.address)}`}
                       target="_blank"
                       rel="noopener noreferrer"
                     >
