@@ -282,9 +282,21 @@ const BarberProfile = () => {
                 )}
 
                 {currentBarber.address && (
-                  <div className="flex items-start gap-2">
-                    <MapPin className="h-5 w-5 text-muted-foreground mt-0.5" />
-                    <span>{currentBarber.address}</span>
+                  <div className="space-y-2">
+                    <div className="flex items-start gap-2">
+                      <MapPin className="h-5 w-5 text-muted-foreground mt-0.5" />
+                      <span>{currentBarber.address}</span>
+                    </div>
+                    <a
+                      href={`https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(currentBarber.address)}`}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                    >
+                      <Button variant="outline" size="sm" className="w-full">
+                        <MapPin className="mr-2 h-4 w-4" />
+                        Yol Tarifi
+                      </Button>
+                    </a>
                   </div>
                 )}
 

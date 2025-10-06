@@ -67,6 +67,7 @@ const BarberProfileForm = ({ profileId }: BarberProfileFormProps) => {
   const [loading, setLoading] = useState(false);
   const [barberProfile, setBarberProfile] = useState<BarberProfile | null>(null);
   const [newService, setNewService] = useState('');
+  const [phone, setPhone] = useState('');
   const { register, handleSubmit, setValue, watch, reset } = useForm<BarberProfile>();
 
   const watchedServices = watch('services') || [];
@@ -78,29 +79,40 @@ const BarberProfileForm = ({ profileId }: BarberProfileFormProps) => {
 
   const fetchBarberProfile = async () => {
     try {
-      const { data, error } = await supabase
+      const { data: barberData, error: barberError } = await supabase
         .from('barbers')
         .select('*')
         .eq('profile_id', profileId)
         .maybeSingle();
 
-      if (error && error.code !== 'PGRST116') {
+      if (barberError && barberError.code !== 'PGRST116') {
         return;
       }
 
-      if (data) {
-        const barberData: BarberProfile = {
-          id: data.id,
-          shop_name: data.shop_name,
-          address: data.address || '',
-          description: data.description || '',
-          services: data.services || [],
-          working_hours: (data.working_hours as any) || defaultWorkingHours,
-          shop_status: (data.shop_status as 'open' | 'closed') || 'closed',
-          price_range: data.price_range || '100'
+      // Fetch phone from profiles table
+      const { data: profileData } = await supabase
+        .from('profiles')
+        .select('phone')
+        .eq('id', profileId)
+        .single();
+
+      if (profileData?.phone) {
+        setPhone(profileData.phone);
+      }
+
+      if (barberData) {
+        const profile: BarberProfile = {
+          id: barberData.id,
+          shop_name: barberData.shop_name,
+          address: barberData.address || '',
+          description: barberData.description || '',
+          services: barberData.services || [],
+          working_hours: (barberData.working_hours as any) || defaultWorkingHours,
+          shop_status: (barberData.shop_status as 'open' | 'closed') || 'closed',
+          price_range: barberData.price_range || '100'
         };
-        setBarberProfile(barberData);
-        reset(barberData);
+        setBarberProfile(profile);
+        reset(profile);
       } else {
         // Set default values for new profile
         reset({
@@ -121,6 +133,14 @@ const BarberProfileForm = ({ profileId }: BarberProfileFormProps) => {
   const onSubmit = async (data: BarberProfile) => {
     setLoading(true);
     try {
+      // Update phone in profiles table
+      const { error: phoneError } = await supabase
+        .from('profiles')
+        .update({ phone: phone.trim() || null })
+        .eq('id', profileId);
+
+      if (phoneError) throw phoneError;
+
       const profileData = {
         profile_id: profileId,
         shop_name: data.shop_name,
@@ -207,6 +227,17 @@ const BarberProfileForm = ({ profileId }: BarberProfileFormProps) => {
               id="shop_name"
               {...register('shop_name', { required: true })}
               placeholder="Örn: Usta Berber"
+            />
+          </div>
+
+          <div>
+            <Label htmlFor="phone">Telefon Numarası</Label>
+            <Input
+              id="phone"
+              type="tel"
+              value={phone}
+              onChange={(e) => setPhone(e.target.value)}
+              placeholder="Örn: 0555 123 45 67"
             />
           </div>
 

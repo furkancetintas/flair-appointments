@@ -7,7 +7,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Input } from '@/components/ui/input';
-import { MapPin, Clock, Search, Scissors } from 'lucide-react';
+import { MapPin, Clock, Search, Scissors, Phone } from 'lucide-react';
 
 const Barbers = () => {
   const dispatch = useAppDispatch();
@@ -127,6 +127,15 @@ const Barbers = () => {
                         {formatWorkingHours(barber.working_hours)}
                       </span>
                     </div>
+
+                    {barber.profile.phone && (
+                      <div className="flex items-start gap-2">
+                        <Phone className="h-4 w-4 text-muted-foreground mt-0.5" />
+                        <span className="text-sm text-muted-foreground">
+                          {barber.profile.phone}
+                        </span>
+                      </div>
+                    )}
 
                     {barber.description && (
                       <p className="text-sm text-muted-foreground">
