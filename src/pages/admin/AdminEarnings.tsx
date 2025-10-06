@@ -176,7 +176,7 @@ export default function AdminEarnings() {
     const maxAmount = Math.max(...data.map(item => item.amount));
 
     return (
-      <div className="flex justify-center gap-4 p-6">
+      <div className="flex justify-center gap-0.5 p-6">
         {data.map((item, index) => (
           <ChartBar
             key={index}
