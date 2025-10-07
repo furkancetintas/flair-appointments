@@ -79,24 +79,24 @@ export const fetchBarberBySlug = createAsyncThunk(
   'barbers/fetchBarberBySlug',
   async (slug: string, { rejectWithValue }) => {
     try {
+      // Fetch all barbers
       const { data, error } = await supabase
         .from('barbers')
         .select(`
           *,
           profile:profiles!profile_id(full_name, email, phone)
-        `)
-        .ilike('shop_name', slug.split('-').join(' '));
+        `);
 
       if (error) throw error;
       
-      // Find the exact match by converting shop_name to slug
+      // Turkish character mapping
       const turkishMap: { [key: string]: string } = {
-        'ç': 'c', 'Ç': 'C',
-        'ğ': 'g', 'Ğ': 'G',
-        'ı': 'i', 'İ': 'I',
-        'ö': 'o', 'Ö': 'O',
-        'ş': 's', 'Ş': 'S',
-        'ü': 'u', 'Ü': 'U',
+        'ç': 'c', 'Ç': 'c',
+        'ğ': 'g', 'Ğ': 'g',
+        'ı': 'i', 'İ': 'i',
+        'ö': 'o', 'Ö': 'o',
+        'ş': 's', 'Ş': 's',
+        'ü': 'u', 'Ü': 'u',
       };
       
       const slugify = (text: string): string => {
@@ -112,6 +112,7 @@ export const fetchBarberBySlug = createAsyncThunk(
           .replace(/^-+|-+$/g, '');
       };
 
+      // Find barber with matching slug
       const barber = data?.find(b => slugify(b.shop_name) === slug);
       
       if (!barber) {

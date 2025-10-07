@@ -1,12 +1,12 @@
 // Convert text to URL-friendly slug
 export function slugify(text: string): string {
   const turkishMap: { [key: string]: string } = {
-    'ç': 'c', 'Ç': 'C',
-    'ğ': 'g', 'Ğ': 'G',
-    'ı': 'i', 'İ': 'I',
-    'ö': 'o', 'Ö': 'O',
-    'ş': 's', 'Ş': 'S',
-    'ü': 'u', 'Ü': 'U',
+    'ç': 'c', 'Ç': 'c',
+    'ğ': 'g', 'Ğ': 'g',
+    'ı': 'i', 'İ': 'i',
+    'ö': 'o', 'Ö': 'o',
+    'ş': 's', 'Ş': 's',
+    'ü': 'u', 'Ü': 'u',
   };
 
   return text
