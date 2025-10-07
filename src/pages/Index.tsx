@@ -3,7 +3,7 @@ import { Link } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
-import { Scissors, Calendar, Users, Star, ArrowRight, Search } from 'lucide-react';
+import { Scissors, Calendar, Users, Star, ArrowRight, Search, MapPin } from 'lucide-react';
 import { useAppDispatch } from '@/hooks/useAppDispatch';
 import { fetchAppointmentById } from '@/store/slices/appointmentsSlice';
 import { format } from 'date-fns';
@@ -144,10 +144,22 @@ const Index = () => {
                 <p className="font-medium">{appointmentData.barber?.shop_name}</p>
                 <p className="text-sm">{appointmentData.barber?.profile?.full_name}</p>
               </div>
-              <div>
-                <p className="text-sm text-muted-foreground">Adres</p>
-                <p className="text-sm">{appointmentData.barber?.address}</p>
-              </div>
+              {appointmentData.barber?.address && (
+                <div className="space-y-2">
+                  <p className="text-sm text-muted-foreground">Adres</p>
+                  <p className="text-sm mb-2">{appointmentData.barber.address}</p>
+                  <a
+                    href={`https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(appointmentData.barber.shop_name + appointmentData.barber.address)}`}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                  >
+                    <Button variant="outline" size="sm" className="w-full">
+                      <MapPin className="mr-2 h-4 w-4" />
+                      Yol Tarifi
+                    </Button>
+                  </a>
+                </div>
+              )}
               <div>
                 <p className="text-sm text-muted-foreground">Tarih ve Saat</p>
                 <p className="font-medium">
