@@ -7,7 +7,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Calendar, Clock, Scissors, LogOut } from 'lucide-react';
-import { Link } from 'react-router-dom';
+import { Link, Navigate } from 'react-router-dom';
 
 const MyAppointments = () => {
   const { profile, signOut } = useAuth();
@@ -39,6 +39,11 @@ const MyAppointments = () => {
       default: return status;
     }
   };
+
+  // Redirect barbers to barbers page
+  if (profile?.role === 'barber') {
+    return <Navigate to="/barbers" replace />;
+  }
 
   if (loading) {
     return (

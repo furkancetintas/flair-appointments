@@ -335,92 +335,104 @@ const BarberProfile = () => {
             </Card>
           </div>
 
-          {/* Appointment Booking */}
-          <div className="space-y-6">
-            <Card>
-              <CardHeader>
-                <CardTitle className="flex items-center gap-2">
-                  <CalendarIcon className="h-5 w-5" />
-                  Randevu Al
-                </CardTitle>
-                <CardDescription>
-                  Müsait bir tarih ve saat seçerek randevu alabilirsiniz
-                </CardDescription>
-              </CardHeader>
-              <CardContent className="space-y-6">
-                {/* Date Selection */}
-                <div>
-                  <Label className="text-base font-semibold">Tarih Seçin</Label>
-                  <Calendar
-                    mode="single"
-                    selected={selectedDate}
-                    onSelect={setSelectedDate}
-                    disabled={(date) => date < new Date() || date > addDays(new Date(), 30)}
-                    className="rounded-md border mt-2"
-                    locale={tr}
-                  />
-                  {selectedDate && (
-                    <p className="text-sm text-muted-foreground mt-2">
-                      Seçili tarih: {getDateLabel(selectedDate)}
-                    </p>
-                  )}
-                </div>
-
-                {/* Time Selection */}
-                {selectedDate && (
+          {/* Appointment Booking - Only for customers */}
+          {profile?.role === 'customer' ? (
+            <div className="space-y-6">
+              <Card>
+                <CardHeader>
+                  <CardTitle className="flex items-center gap-2">
+                    <CalendarIcon className="h-5 w-5" />
+                    Randevu Al
+                  </CardTitle>
+                  <CardDescription>
+                    Müsait bir tarih ve saat seçerek randevu alabilirsiniz
+                  </CardDescription>
+                </CardHeader>
+                <CardContent className="space-y-6">
+                  {/* Date Selection */}
                   <div>
-                    <Label className="text-base font-semibold">Saat Seçin</Label>
-                    {timeSlots.length > 0 ? (
-                      <Select value={selectedTime} onValueChange={setSelectedTime}>
-                        <SelectTrigger className="mt-2">
-                          <SelectValue placeholder="Müsait saatlerden seçin" />
-                        </SelectTrigger>
-                        <SelectContent>
-                          {timeSlots.map((time) => (
-                            <SelectItem key={time} value={time}>
-                              {time}
-                            </SelectItem>
-                          ))}
-                        </SelectContent>
-                      </Select>
-                    ) : (
-                      <p className="text-sm text-muted-foreground mt-2 p-4 bg-muted rounded-md">
-                        Bu tarih için müsait saat bulunmamaktadır.
+                    <Label className="text-base font-semibold">Tarih Seçin</Label>
+                    <Calendar
+                      mode="single"
+                      selected={selectedDate}
+                      onSelect={setSelectedDate}
+                      disabled={(date) => date < new Date() || date > addDays(new Date(), 30)}
+                      className="rounded-md border mt-2"
+                      locale={tr}
+                    />
+                    {selectedDate && (
+                      <p className="text-sm text-muted-foreground mt-2">
+                        Seçili tarih: {getDateLabel(selectedDate)}
                       </p>
                     )}
                   </div>
-                )}
 
-                {/* Notes */}
-                {selectedTime && (
-                  <div>
-                    <Label htmlFor="notes" className="text-base font-semibold">
-                      Notlar (Opsiyonel)
-                    </Label>
-                    <Textarea
-                      id="notes"
-                      placeholder="Özel isteklerinizi buraya yazabilirsiniz..."
-                      value={notes}
-                      onChange={(e) => setNotes(e.target.value)}
-                      className="mt-2"
-                    />
-                  </div>
-                )}
+                  {/* Time Selection */}
+                  {selectedDate && (
+                    <div>
+                      <Label className="text-base font-semibold">Saat Seçin</Label>
+                      {timeSlots.length > 0 ? (
+                        <Select value={selectedTime} onValueChange={setSelectedTime}>
+                          <SelectTrigger className="mt-2">
+                            <SelectValue placeholder="Müsait saatlerden seçin" />
+                          </SelectTrigger>
+                          <SelectContent>
+                            {timeSlots.map((time) => (
+                              <SelectItem key={time} value={time}>
+                                {time}
+                              </SelectItem>
+                            ))}
+                          </SelectContent>
+                        </Select>
+                      ) : (
+                        <p className="text-sm text-muted-foreground mt-2 p-4 bg-muted rounded-md">
+                          Bu tarih için müsait saat bulunmamaktadır.
+                        </p>
+                      )}
+                    </div>
+                  )}
 
-                {/* Book Button */}
-                {selectedDate && selectedTime && (
-                  <Button 
-                    onClick={handleBookAppointment}
-                    disabled={bookingLoading || !profile}
-                    className="w-full"
-                    size="lg"
-                  >
-                    {bookingLoading ? 'Randevu Alınıyor...' : 'Randevu Al'}
-                  </Button>
-                )}
-              </CardContent>
-            </Card>
-          </div>
+                  {/* Notes */}
+                  {selectedTime && (
+                    <div>
+                      <Label htmlFor="notes" className="text-base font-semibold">
+                        Notlar (Opsiyonel)
+                      </Label>
+                      <Textarea
+                        id="notes"
+                        placeholder="Özel isteklerinizi buraya yazabilirsiniz..."
+                        value={notes}
+                        onChange={(e) => setNotes(e.target.value)}
+                        className="mt-2"
+                      />
+                    </div>
+                  )}
+
+                  {/* Book Button */}
+                  {selectedDate && selectedTime && (
+                    <Button 
+                      onClick={handleBookAppointment}
+                      disabled={bookingLoading || !profile}
+                      className="w-full"
+                      size="lg"
+                    >
+                      {bookingLoading ? 'Randevu Alınıyor...' : 'Randevu Al'}
+                    </Button>
+                  )}
+                </CardContent>
+              </Card>
+            </div>
+          ) : (
+            <div className="space-y-6">
+              <Card>
+                <CardContent className="flex flex-col items-center justify-center py-12">
+                  <p className="text-muted-foreground text-center">
+                    Berber hesabı ile randevu alamazsınız.
+                  </p>
+                </CardContent>
+              </Card>
+            </div>
+          )}
         </div>
 
         {/* Confirmation Dialog */}
