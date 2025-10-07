@@ -75,6 +75,56 @@ export const fetchBarberById = createAsyncThunk(
   }
 );
 
+export const fetchBarberBySlug = createAsyncThunk(
+  'barbers/fetchBarberBySlug',
+  async (slug: string, { rejectWithValue }) => {
+    try {
+      const { data, error } = await supabase
+        .from('barbers')
+        .select(`
+          *,
+          profile:profiles!profile_id(full_name, email, phone)
+        `)
+        .ilike('shop_name', slug.split('-').join(' '));
+
+      if (error) throw error;
+      
+      // Find the exact match by converting shop_name to slug
+      const turkishMap: { [key: string]: string } = {
+        'ç': 'c', 'Ç': 'C',
+        'ğ': 'g', 'Ğ': 'G',
+        'ı': 'i', 'İ': 'I',
+        'ö': 'o', 'Ö': 'O',
+        'ş': 's', 'Ş': 'S',
+        'ü': 'u', 'Ü': 'U',
+      };
+      
+      const slugify = (text: string): string => {
+        return text
+          .split('')
+          .map(char => turkishMap[char] || char)
+          .join('')
+          .toLowerCase()
+          .trim()
+          .replace(/[^\w\s-]/g, '')
+          .replace(/[\s_]+/g, '-')
+          .replace(/-+/g, '-')
+          .replace(/^-+|-+$/g, '');
+      };
+
+      const barber = data?.find(b => slugify(b.shop_name) === slug);
+      
+      if (!barber) {
+        throw new Error('Berber bulunamadı');
+      }
+
+      return barber;
+    } catch (error: any) {
+      return rejectWithValue(error.message);
+    }
+  }
+);
+
 export const fetchBarberByProfileId = createAsyncThunk(
   'barbers/fetchBarberByProfileId',
   async (profileId: string, { rejectWithValue }) => {
@@ -227,6 +277,20 @@ const barbersSlice = createSlice({
         state.currentBarber = action.payload;
       })
       .addCase(fetchBarberById.rejected, (state, action) => {
+        state.loading = false;
+        state.error = action.payload as string;
+      })
+      
+      // Fetch barber by slug
+      .addCase(fetchBarberBySlug.pending, (state) => {
+        state.loading = true;
+        state.error = null;
+      })
+      .addCase(fetchBarberBySlug.fulfilled, (state, action) => {
+        state.loading = false;
+        state.currentBarber = action.payload;
+      })
+      .addCase(fetchBarberBySlug.rejected, (state, action) => {
         state.loading = false;
         state.error = action.payload as string;
       })

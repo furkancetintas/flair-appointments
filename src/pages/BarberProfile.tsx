@@ -3,7 +3,7 @@ import { useParams, Link } from 'react-router-dom';
 import { useAuth } from '@/hooks/useAuth';
 import { useAppDispatch } from '@/hooks/useAppDispatch';
 import { useAppSelector } from '@/hooks/useAppSelector';
-import { fetchBarberById } from '@/store/slices/barbersSlice';
+import { fetchBarberBySlug } from '@/store/slices/barbersSlice';
 import { fetchAppointmentsForDate, createAppointment } from '@/store/slices/appointmentsSlice';
 import { supabase } from '@/integrations/supabase/client';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
@@ -19,7 +19,7 @@ import { format, addDays, isToday, isTomorrow } from 'date-fns';
 import { tr } from 'date-fns/locale';
 
 const BarberProfile = () => {
-  const { id } = useParams<{ id: string }>();
+  const { slug } = useParams<{ slug: string }>();
   const { profile } = useAuth();
   const dispatch = useAppDispatch();
   const barbersState = useAppSelector((state) => state.barbers);
@@ -36,25 +36,25 @@ const BarberProfile = () => {
   const [confirmedAppointment, setConfirmedAppointment] = useState<any>(null);
 
   useEffect(() => {
-    if (id) {
-      dispatch(fetchBarberById(id));
+    if (slug) {
+      dispatch(fetchBarberBySlug(slug));
     }
-  }, [id, dispatch]);
+  }, [slug, dispatch]);
 
   useEffect(() => {
-    if (selectedDate && id) {
+    if (selectedDate && currentBarber?.id) {
       const dateStr = format(selectedDate, 'yyyy-MM-dd');
-      dispatch(fetchAppointmentsForDate({ barberId: id, date: dateStr })).then((result: any) => {
+      dispatch(fetchAppointmentsForDate({ barberId: currentBarber.id, date: dateStr })).then((result: any) => {
         if (result.payload) {
           setBookedTimes((result.payload as any[]).map((apt: any) => apt.appointment_time));
         }
       });
     }
-  }, [selectedDate, id, dispatch]);
+  }, [selectedDate, currentBarber?.id, dispatch]);
 
   // Real-time updates for appointments
   useEffect(() => {
-    if (!id || !selectedDate) return;
+    if (!currentBarber?.id || !selectedDate) return;
 
     const channel = supabase
       .channel('appointment-updates')
@@ -64,12 +64,12 @@ const BarberProfile = () => {
           event: '*',
           schema: 'public',
           table: 'appointments',
-          filter: `barber_id=eq.${id}`
+          filter: `barber_id=eq.${currentBarber.id}`
         },
         (payload) => {
           // Refresh available times for the selected date
           const dateStr = format(selectedDate, 'yyyy-MM-dd');
-          dispatch(fetchAppointmentsForDate({ barberId: id, date: dateStr })).then((result: any) => {
+          dispatch(fetchAppointmentsForDate({ barberId: currentBarber.id, date: dateStr })).then((result: any) => {
             if (result.payload) {
               setBookedTimes((result.payload as any[]).map((apt: any) => apt.appointment_time));
             }
@@ -81,7 +81,7 @@ const BarberProfile = () => {
     return () => {
       supabase.removeChannel(channel);
     };
-  }, [id, selectedDate, dispatch]);
+  }, [currentBarber?.id, selectedDate, dispatch]);
 
   const generateTimeSlots = () => {
     if (!currentBarber || !selectedDate) return [];
@@ -165,7 +165,7 @@ const BarberProfile = () => {
   };
 
   const handleBookAppointment = async () => {
-    if (!profile || !selectedDate || !selectedTime || !id || !currentBarber) {
+    if (!profile || !selectedDate || !selectedTime || !currentBarber) {
       return;
     }
 
@@ -176,7 +176,7 @@ const BarberProfile = () => {
 
     const appointmentData = {
       customer_id: profile.id,
-      barber_id: id,
+      barber_id: currentBarber.id,
       appointment_date: format(selectedDate, 'yyyy-MM-dd'),
       appointment_time: selectedTime,
       service: 'Genel',
@@ -199,7 +199,7 @@ const BarberProfile = () => {
       
       // Refresh booked times for the selected date
       const dateStr = format(selectedDate, 'yyyy-MM-dd');
-      dispatch(fetchAppointmentsForDate({ barberId: id, date: dateStr })).then((result: any) => {
+      dispatch(fetchAppointmentsForDate({ barberId: currentBarber.id, date: dateStr })).then((result: any) => {
         if (result.payload) {
           setBookedTimes((result.payload as any[]).map((apt: any) => apt.appointment_time));
         }

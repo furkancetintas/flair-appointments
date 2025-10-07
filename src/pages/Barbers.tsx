@@ -8,6 +8,7 @@ import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Input } from '@/components/ui/input';
 import { MapPin, Clock, Search, Scissors, Phone } from 'lucide-react';
+import { slugify } from '@/lib/slugify';
 
 const Barbers = () => {
   const dispatch = useAppDispatch();
@@ -159,7 +160,7 @@ const Barbers = () => {
                     )}
 
                     <div className="pt-4">
-                      <Link to={`/barber/${barber.id}`}>
+                      <Link to={`/barber/${slugify(barber.shop_name)}`}>
                         <Button className="w-full">
                           Profili Görüntüle
                         </Button>

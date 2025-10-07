@@ -83,7 +83,7 @@ function AppRoutes() {
         <Route path="/auth" element={<AuthRoute><Auth /></AuthRoute>} />
         <Route path="/my-appointments" element={<ProtectedRoute><MyAppointments /></ProtectedRoute>} />
         <Route path="/barbers" element={<ProtectedRoute><Barbers /></ProtectedRoute>} />
-        <Route path="/barber/:id" element={<ProtectedRoute><BarberProfile /></ProtectedRoute>} />
+        <Route path="/barber/:slug" element={<ProtectedRoute><BarberProfile /></ProtectedRoute>} />
         
         {/* Admin Routes */}
         <Route path="/admin/earnings" element={<ProtectedRoute><AdminLayout><AdminEarnings /></AdminLayout></ProtectedRoute>} />
