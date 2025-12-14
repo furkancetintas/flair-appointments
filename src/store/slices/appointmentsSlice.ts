@@ -1,14 +1,14 @@
-import { createSlice, createAsyncThunk, PayloadAction } from '@reduxjs/toolkit';
+import { createSlice, createAsyncThunk } from '@reduxjs/toolkit';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
 
 export interface Appointment {
   id: string;
   customer_id: string;
-  barber_id: string;
   appointment_date: string;
   appointment_time: string;
   service: string;
+  price: number;
   status: 'pending' | 'confirmed' | 'cancelled' | 'completed';
   notes: string | null;
   created_at: string;
@@ -18,20 +18,11 @@ export interface Appointment {
     email: string;
     phone: string | null;
   };
-  barber?: {
-    shop_name: string;
-    address: string | null;
-    profile: {
-      full_name: string;
-      email: string;
-      phone: string | null;
-    };
-  };
 }
 
 interface AppointmentsState {
   appointments: Appointment[];
-  barberAppointments: Appointment[];
+  adminAppointments: Appointment[];
   loading: boolean;
   error: string | null;
   bookingLoading: boolean;
@@ -39,34 +30,27 @@ interface AppointmentsState {
 
 const initialState: AppointmentsState = {
   appointments: [],
-  barberAppointments: [],
+  adminAppointments: [],
   loading: false,
   error: null,
   bookingLoading: false,
 };
 
-// Async thunks
+// Fetch customer appointments
 export const fetchCustomerAppointments = createAsyncThunk(
   'appointments/fetchCustomerAppointments',
   async (customerId: string, { rejectWithValue }) => {
     try {
       const { data, error } = await supabase
         .from('appointments')
-        .select(`
-          *,
-          barber:barbers!barber_id(
-            shop_name,
-            address,
-            profile:profiles!profile_id(full_name, email, phone)
-          )
-        `)
+        .select('*')
         .eq('customer_id', customerId)
         .order('appointment_date', { ascending: false })
         .order('appointment_time', { ascending: false });
 
       if (error) throw error;
 
-      return data || [];
+      return (data || []) as Appointment[];
     } catch (error: any) {
       console.error('Error fetching customer appointments:', error);
       return rejectWithValue(error.message);
@@ -74,9 +58,10 @@ export const fetchCustomerAppointments = createAsyncThunk(
   }
 );
 
-export const fetchBarberAppointments = createAsyncThunk(
-  'appointments/fetchBarberAppointments',
-  async (barberId: string, { rejectWithValue }) => {
+// Fetch all appointments (admin)
+export const fetchAdminAppointments = createAsyncThunk(
+  'appointments/fetchAdminAppointments',
+  async (_, { rejectWithValue }) => {
     try {
       const { data, error } = await supabase
         .from('appointments')
@@ -84,29 +69,29 @@ export const fetchBarberAppointments = createAsyncThunk(
           *,
           customer:profiles!customer_id(full_name, email, phone)
         `)
-        .eq('barber_id', barberId)
         .order('appointment_date', { ascending: true })
         .order('appointment_time', { ascending: true });
 
       if (error) throw error;
 
-      return data || [];
+      return (data || []) as Appointment[];
     } catch (error: any) {
-      console.error('Error fetching barber appointments:', error);
+      console.error('Error fetching admin appointments:', error);
       return rejectWithValue(error.message);
     }
   }
 );
 
+// Fetch appointments for a specific date
 export const fetchAppointmentsForDate = createAsyncThunk(
   'appointments/fetchAppointmentsForDate',
-  async ({ barberId, date }: { barberId: string; date: string }, { rejectWithValue }) => {
+  async (date: string, { rejectWithValue }) => {
     try {
       const { data, error } = await supabase
         .from('appointments')
         .select('appointment_time')
-        .eq('barber_id', barberId)
-        .eq('appointment_date', date);
+        .eq('appointment_date', date)
+        .neq('status', 'cancelled');
 
       if (error) throw error;
 
@@ -118,11 +103,11 @@ export const fetchAppointmentsForDate = createAsyncThunk(
   }
 );
 
+// Create appointment
 export const createAppointment = createAsyncThunk(
   'appointments/createAppointment',
   async (appointmentData: {
     customer_id: string;
-    barber_id: string;
     appointment_date: string;
     appointment_time: string;
     service: string;
@@ -130,9 +115,8 @@ export const createAppointment = createAsyncThunk(
     notes?: string;
   }, { rejectWithValue }) => {
     try {
-      // First check if the time slot is available using our database function
-      const { data: isAvailable } = await supabase.rpc('check_appointment_availability', {
-        barber_id_param: appointmentData.barber_id,
+      // First check if the time slot is available
+      const { data: isAvailable } = await (supabase as any).rpc('check_appointment_availability', {
         appointment_date_param: appointmentData.appointment_date,
         appointment_time_param: appointmentData.appointment_time
       });
@@ -142,24 +126,16 @@ export const createAppointment = createAsyncThunk(
         return rejectWithValue('Time slot not available');
       }
 
-      const { data, error } = await supabase
+      const { data, error } = await (supabase as any)
         .from('appointments')
         .insert({
           ...appointmentData,
           status: 'pending'
         })
-        .select(`
-          *,
-          barber:barbers!barber_id(
-            shop_name,
-            address,
-            profile:profiles!profile_id(full_name, email, phone)
-          )
-        `)
+        .select()
         .single();
 
       if (error) {
-        // Handle unique constraint violation
         if (error.code === '23505') {
           toast.error('Bu saat dolu! Lütfen başka bir saat seçin.');
           return rejectWithValue('Time slot already booked');
@@ -168,7 +144,7 @@ export const createAppointment = createAsyncThunk(
       }
 
       toast.success('Randevunuz başarıyla alındı!');
-      return data;
+      return data as Appointment;
     } catch (error: any) {
       console.error('Error creating appointment:', error);
       toast.error('Randevu alınırken bir hata oluştu');
@@ -177,6 +153,7 @@ export const createAppointment = createAsyncThunk(
   }
 );
 
+// Update appointment status
 export const updateAppointmentStatus = createAsyncThunk(
   'appointments/updateAppointmentStatus',
   async ({ appointmentId, status }: { appointmentId: string; status: string }, { rejectWithValue }) => {
@@ -198,7 +175,7 @@ export const updateAppointmentStatus = createAsyncThunk(
                         status === 'completed' ? 'tamamlandı' : status;
       
       toast.success(`Randevu ${statusText}!`);
-      return data;
+      return data as Appointment;
     } catch (error: any) {
       console.error('Error updating appointment status:', error);
       toast.error('Randevu güncellenirken bir hata oluştu');
@@ -207,6 +184,7 @@ export const updateAppointmentStatus = createAsyncThunk(
   }
 );
 
+// Fetch appointment by ID
 export const fetchAppointmentById = createAsyncThunk(
   'appointments/fetchAppointmentById',
   async (appointmentId: string, { rejectWithValue }) => {
@@ -215,19 +193,14 @@ export const fetchAppointmentById = createAsyncThunk(
         .from('appointments')
         .select(`
           *,
-          customer:profiles!customer_id(full_name, email, phone),
-          barber:barbers!barber_id(
-            shop_name,
-            address,
-            profile:profiles!profile_id(full_name, phone)
-          )
+          customer:profiles!customer_id(full_name, email, phone)
         `)
         .eq('id', appointmentId)
         .single();
 
       if (error) throw error;
 
-      return data;
+      return data as Appointment;
     } catch (error: any) {
       console.error('Error fetching appointment:', error);
       return rejectWithValue(error.message);
@@ -244,7 +217,7 @@ const appointmentsSlice = createSlice({
     },
     resetAppointments: (state) => {
       state.appointments = [];
-      state.barberAppointments = [];
+      state.adminAppointments = [];
     },
   },
   extraReducers: (builder) => {
@@ -256,23 +229,23 @@ const appointmentsSlice = createSlice({
       })
       .addCase(fetchCustomerAppointments.fulfilled, (state, action) => {
         state.loading = false;
-        state.appointments = action.payload as Appointment[];
+        state.appointments = action.payload;
       })
       .addCase(fetchCustomerAppointments.rejected, (state, action) => {
         state.loading = false;
         state.error = action.payload as string;
       })
       
-      // Fetch barber appointments
-      .addCase(fetchBarberAppointments.pending, (state) => {
+      // Fetch admin appointments
+      .addCase(fetchAdminAppointments.pending, (state) => {
         state.loading = true;
         state.error = null;
       })
-      .addCase(fetchBarberAppointments.fulfilled, (state, action) => {
+      .addCase(fetchAdminAppointments.fulfilled, (state, action) => {
         state.loading = false;
-        state.barberAppointments = action.payload as Appointment[];
+        state.adminAppointments = action.payload;
       })
-      .addCase(fetchBarberAppointments.rejected, (state, action) => {
+      .addCase(fetchAdminAppointments.rejected, (state, action) => {
         state.loading = false;
         state.error = action.payload as string;
       })
@@ -284,7 +257,9 @@ const appointmentsSlice = createSlice({
       })
       .addCase(createAppointment.fulfilled, (state, action) => {
         state.bookingLoading = false;
-        state.appointments.unshift(action.payload as Appointment);
+        if (action.payload) {
+          state.appointments.unshift(action.payload);
+        }
       })
       .addCase(createAppointment.rejected, (state, action) => {
         state.bookingLoading = false;
@@ -293,12 +268,12 @@ const appointmentsSlice = createSlice({
       
       // Update appointment status
       .addCase(updateAppointmentStatus.fulfilled, (state, action) => {
-        const updatedAppointment = action.payload as Appointment;
+        const updatedAppointment = action.payload;
         
-        // Update in barber appointments
-        const barberIndex = state.barberAppointments.findIndex(apt => apt.id === updatedAppointment.id);
-        if (barberIndex >= 0) {
-          state.barberAppointments[barberIndex] = updatedAppointment;
+        // Update in admin appointments
+        const adminIndex = state.adminAppointments.findIndex(apt => apt.id === updatedAppointment.id);
+        if (adminIndex >= 0) {
+          state.adminAppointments[adminIndex] = updatedAppointment;
         }
         
         // Update in customer appointments

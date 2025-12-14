@@ -1,13 +1,13 @@
 import { configureStore } from '@reduxjs/toolkit';
 import authReducer from './slices/authSlice';
-import barbersReducer from './slices/barbersSlice';
 import appointmentsReducer from './slices/appointmentsSlice';
+import shopSettingsReducer from './slices/shopSettingsSlice';
 
 export const store = configureStore({
   reducer: {
     auth: authReducer,
-    barbers: barbersReducer,
     appointments: appointmentsReducer,
+    shopSettings: shopSettingsReducer,
   },
   middleware: (getDefaultMiddleware) =>
     getDefaultMiddleware({

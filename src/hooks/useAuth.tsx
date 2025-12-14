@@ -9,7 +9,7 @@ interface AuthContextType {
   session: any;
   profile: any;
   loading: boolean;
-  signUp: (email: string, password: string, fullName: string, role: 'customer' | 'barber') => Promise<{ error: any }>;
+  signUp: (email: string, password: string, fullName: string) => Promise<{ error: any }>;
   signIn: (email: string, password: string) => Promise<{ error: any }>;
   signOut: () => Promise<void>;
 }
@@ -38,8 +38,8 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     return () => subscription.unsubscribe();
   }, [dispatch]);
 
-  const signUp = async (email: string, password: string, fullName: string, role: 'customer' | 'barber') => {
-    const result = await dispatch(signUpAction({ email, password, fullName, role }));
+  const signUp = async (email: string, password: string, fullName: string) => {
+    const result = await dispatch(signUpAction({ email, password, fullName }));
     return { error: result.meta.requestStatus === 'rejected' ? result.payload : null };
   };
 
