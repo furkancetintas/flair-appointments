@@ -3,21 +3,24 @@ import { useAuth } from '@/hooks/useAuth';
 import { useAppDispatch } from '@/hooks/useAppDispatch';
 import { useAppSelector } from '@/hooks/useAppSelector';
 import { fetchCustomerAppointments } from '@/store/slices/appointmentsSlice';
+import { fetchShopSettings } from '@/store/slices/shopSettingsSlice';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
-import { Calendar, Clock, Scissors, LogOut } from 'lucide-react';
+import { Calendar, Clock, Scissors, LogOut, Plus } from 'lucide-react';
 import { Link, Navigate } from 'react-router-dom';
 
 const MyAppointments = () => {
   const { profile, signOut } = useAuth();
   const dispatch = useAppDispatch();
   const { appointments, loading } = useAppSelector((state) => state.appointments);
+  const { settings } = useAppSelector((state) => state.shopSettings);
 
   useEffect(() => {
     if (profile) {
       dispatch(fetchCustomerAppointments(profile.id));
     }
+    dispatch(fetchShopSettings());
   }, [profile, dispatch]);
 
   const getStatusColor = (status: string) => {
@@ -40,9 +43,9 @@ const MyAppointments = () => {
     }
   };
 
-  // Redirect barbers to barbers page
-  if (profile?.role === 'barber') {
-    return <Navigate to="/barbers" replace />;
+  // Redirect admin to admin panel
+  if (profile?.role === 'admin') {
+    return <Navigate to="/admin/earnings" replace />;
   }
 
   if (loading) {
@@ -65,10 +68,10 @@ const MyAppointments = () => {
             <p className="text-muted-foreground">Randevularınızı görüntüleyin</p>
           </div>
           <div className="flex items-center gap-4">
-            <Link to="/barbers">
-              <Button variant="outline" className="flex items-center gap-2">
-                <Scissors className="h-4 w-4" />
-                Berberler
+            <Link to="/book">
+              <Button className="flex items-center gap-2">
+                <Plus className="h-4 w-4" />
+                Randevu Al
               </Button>
             </Link>
             <Button 
@@ -94,9 +97,9 @@ const MyAppointments = () => {
               <CardContent className="flex flex-col items-center justify-center py-12">
                 <Calendar className="h-12 w-12 text-muted-foreground mb-4" />
                 <p className="text-muted-foreground text-center">
-                  Henüz hiç randevunuz yok. Berberler sayfasından randevu alabilirsiniz.
+                  Henüz hiç randevunuz yok.
                 </p>
-                <Link to="/barbers" className="mt-4">
+                <Link to="/book" className="mt-4">
                   <Button>Randevu Al</Button>
                 </Link>
               </CardContent>
@@ -127,28 +130,20 @@ const MyAppointments = () => {
                         <div className="flex items-start gap-2">
                           <Scissors className="h-4 w-4 text-muted-foreground mt-1" />
                           <div>
-                            <p className="font-medium">{appointment.barber?.shop_name}</p>
-                            {appointment.barber?.address && (
-                              <p className="text-sm text-muted-foreground">{appointment.barber.address}</p>
+                            <p className="font-medium">{settings?.shop_name || 'Berber Dükkanı'}</p>
+                            {settings?.address && (
+                              <p className="text-sm text-muted-foreground">{settings.address}</p>
                             )}
                           </div>
                         </div>
                         
-                        <div className="border-t pt-3 space-y-2">
-                          <p className="text-sm">
-                            <span className="font-medium">Berber:</span> {appointment.barber?.profile.full_name}
-                          </p>
-                          {appointment.barber?.profile.phone && (
+                        {settings?.phone && (
+                          <div className="border-t pt-3">
                             <p className="text-sm">
-                              <span className="font-medium">Telefon:</span> {appointment.barber.profile.phone}
+                              <span className="font-medium">Telefon:</span> {settings.phone}
                             </p>
-                          )}
-                          {appointment.barber?.profile.email && (
-                            <p className="text-sm">
-                              <span className="font-medium">E-posta:</span> {appointment.barber.profile.email}
-                            </p>
-                          )}
-                        </div>
+                          </div>
+                        )}
                       </div>
                       
                       {appointment.notes && (

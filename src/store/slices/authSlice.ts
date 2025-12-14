@@ -8,7 +8,7 @@ export interface Profile {
   user_id: string;
   full_name: string;
   email: string;
-  role: 'customer' | 'barber';
+  role: 'customer' | 'admin';
   phone?: string;
   created_at: string;
   updated_at: string;
@@ -68,11 +68,10 @@ export const initializeAuth = createAsyncThunk(
 
 export const signUp = createAsyncThunk(
   'auth/signUp',
-  async ({ email, password, fullName, role }: {
+  async ({ email, password, fullName }: {
     email: string;
     password: string;
     fullName: string;
-    role: 'customer' | 'barber';
   }, { rejectWithValue }) => {
     try {
       const redirectUrl = `${window.location.origin}/`;
@@ -84,7 +83,7 @@ export const signUp = createAsyncThunk(
           emailRedirectTo: redirectUrl,
           data: {
             full_name: fullName,
-            role: role,
+            role: 'customer', // Only customers can register
           },
         },
       });

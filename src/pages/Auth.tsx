@@ -5,7 +5,6 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { useAuth } from '@/hooks/useAuth';
 import { Scissors, UserPlus, LogIn } from 'lucide-react';
 import { loginSchema, signupSchema } from '@/lib/validation';
@@ -16,61 +15,41 @@ const Auth = () => {
   const { signIn, signUp, loading } = useAuth();
   
   const [loginForm, setLoginForm] = useState({ email: '', password: '' });
-  const [signupForm, setSignupForm] = useState({ 
-    email: '', 
-    password: '', 
-    fullName: '', 
-    role: 'customer' as 'customer' | 'barber' 
-  });
+  const [signupForm, setSignupForm] = useState({ email: '', password: '', fullName: '' });
   const [isLoading, setIsLoading] = useState(false);
 
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
     
-    // Validate input
     const validation = loginSchema.safeParse(loginForm);
     if (!validation.success) {
-      const firstError = validation.error.errors[0];
-      toast.error(firstError.message);
+      toast.error(validation.error.errors[0].message);
       return;
     }
     
     setIsLoading(true);
     const { error } = await signIn(loginForm.email, loginForm.password);
-    
     if (!error) {
-      // Navigation will be handled by AuthRoute based on role
       navigate('/');
     }
-    
     setIsLoading(false);
   };
 
   const handleSignup = async (e: React.FormEvent) => {
     e.preventDefault();
     
-    // Validate input
     const validation = signupSchema.safeParse(signupForm);
     if (!validation.success) {
-      const firstError = validation.error.errors[0];
-      toast.error(firstError.message);
+      toast.error(validation.error.errors[0].message);
       return;
     }
     
     setIsLoading(true);
-    const { error } = await signUp(
-      signupForm.email, 
-      signupForm.password, 
-      signupForm.fullName, 
-      signupForm.role
-    );
-    
+    const { error } = await signUp(signupForm.email, signupForm.password, signupForm.fullName);
     if (!error) {
-      // Switch to login tab after successful signup
       const loginTab = document.querySelector('[value="login"]') as HTMLElement;
       loginTab?.click();
     }
-    
     setIsLoading(false);
   };
 
@@ -92,62 +71,32 @@ const Auth = () => {
             </div>
             <h1 className="text-3xl font-bold text-foreground">BarberBook</h1>
           </div>
-          <p className="text-muted-foreground">
-            Berber randevularınızı kolayca yönetin
-          </p>
+          <p className="text-muted-foreground">Berber randevularınızı kolayca yönetin</p>
         </div>
 
         <Tabs defaultValue="login" className="space-y-6">
           <TabsList className="grid w-full grid-cols-2">
-            <TabsTrigger value="login" className="flex items-center gap-2">
-              <LogIn className="h-4 w-4" />
-              Giriş Yap
-            </TabsTrigger>
-            <TabsTrigger value="signup" className="flex items-center gap-2">
-              <UserPlus className="h-4 w-4" />
-              Kayıt Ol
-            </TabsTrigger>
+            <TabsTrigger value="login"><LogIn className="h-4 w-4 mr-2" />Giriş Yap</TabsTrigger>
+            <TabsTrigger value="signup"><UserPlus className="h-4 w-4 mr-2" />Kayıt Ol</TabsTrigger>
           </TabsList>
 
           <TabsContent value="login">
             <Card>
               <CardHeader>
                 <CardTitle>Giriş Yap</CardTitle>
-                <CardDescription>
-                  Hesabınıza giriş yapın
-                </CardDescription>
+                <CardDescription>Hesabınıza giriş yapın</CardDescription>
               </CardHeader>
               <CardContent>
                 <form onSubmit={handleLogin} className="space-y-4">
                   <div className="space-y-2">
                     <Label htmlFor="login-email">E-posta</Label>
-                    <Input
-                      id="login-email"
-                      type="email"
-                      value={loginForm.email}
-                      onChange={(e) => setLoginForm(prev => ({ ...prev, email: e.target.value }))}
-                      placeholder="ornek@email.com"
-                      required
-                    />
+                    <Input id="login-email" type="email" value={loginForm.email} onChange={(e) => setLoginForm(prev => ({ ...prev, email: e.target.value }))} placeholder="ornek@email.com" required />
                   </div>
                   <div className="space-y-2">
                     <Label htmlFor="login-password">Şifre</Label>
-                    <Input
-                      id="login-password"
-                      type="password"
-                      value={loginForm.password}
-                      onChange={(e) => setLoginForm(prev => ({ ...prev, password: e.target.value }))}
-                      placeholder="••••••••"
-                      required
-                    />
+                    <Input id="login-password" type="password" value={loginForm.password} onChange={(e) => setLoginForm(prev => ({ ...prev, password: e.target.value }))} placeholder="••••••••" required />
                   </div>
-                  <Button 
-                    type="submit" 
-                    className="w-full"
-                    disabled={isLoading}
-                  >
-                    {isLoading ? "Giriş yapılıyor..." : "Giriş Yap"}
-                  </Button>
+                  <Button type="submit" className="w-full" disabled={isLoading}>{isLoading ? "Giriş yapılıyor..." : "Giriş Yap"}</Button>
                 </form>
               </CardContent>
             </Card>
@@ -157,70 +106,23 @@ const Auth = () => {
             <Card>
               <CardHeader>
                 <CardTitle>Kayıt Ol</CardTitle>
-                <CardDescription>
-                  Yeni hesap oluşturun
-                </CardDescription>
+                <CardDescription>Yeni müşteri hesabı oluşturun</CardDescription>
               </CardHeader>
               <CardContent>
                 <form onSubmit={handleSignup} className="space-y-4">
                   <div className="space-y-2">
                     <Label htmlFor="signup-name">Ad Soyad</Label>
-                    <Input
-                      id="signup-name"
-                      type="text"
-                      value={signupForm.fullName}
-                      onChange={(e) => setSignupForm(prev => ({ ...prev, fullName: e.target.value }))}
-                      placeholder="Adınız Soyadınız"
-                      required
-                    />
+                    <Input id="signup-name" type="text" value={signupForm.fullName} onChange={(e) => setSignupForm(prev => ({ ...prev, fullName: e.target.value }))} placeholder="Adınız Soyadınız" required />
                   </div>
                   <div className="space-y-2">
                     <Label htmlFor="signup-email">E-posta</Label>
-                    <Input
-                      id="signup-email"
-                      type="email"
-                      value={signupForm.email}
-                      onChange={(e) => setSignupForm(prev => ({ ...prev, email: e.target.value }))}
-                      placeholder="ornek@email.com"
-                      required
-                    />
+                    <Input id="signup-email" type="email" value={signupForm.email} onChange={(e) => setSignupForm(prev => ({ ...prev, email: e.target.value }))} placeholder="ornek@email.com" required />
                   </div>
                   <div className="space-y-2">
                     <Label htmlFor="signup-password">Şifre</Label>
-                    <Input
-                      id="signup-password"
-                      type="password"
-                      value={signupForm.password}
-                      onChange={(e) => setSignupForm(prev => ({ ...prev, password: e.target.value }))}
-                      placeholder="••••••••"
-                      required
-                      minLength={6}
-                    />
+                    <Input id="signup-password" type="password" value={signupForm.password} onChange={(e) => setSignupForm(prev => ({ ...prev, password: e.target.value }))} placeholder="••••••••" required minLength={6} />
                   </div>
-                  <div className="space-y-2">
-                    <Label htmlFor="signup-role">Hesap Türü</Label>
-                    <Select 
-                      value={signupForm.role} 
-                      onValueChange={(value: 'customer' | 'barber') => 
-                        setSignupForm(prev => ({ ...prev, role: value }))
-                      }
-                    >
-                      <SelectTrigger>
-                        <SelectValue placeholder="Hesap türünüzü seçin" />
-                      </SelectTrigger>
-                      <SelectContent>
-                        <SelectItem value="customer">Müşteri</SelectItem>
-                        <SelectItem value="barber">Berber</SelectItem>
-                      </SelectContent>
-                    </Select>
-                  </div>
-                  <Button 
-                    type="submit" 
-                    className="w-full"
-                    disabled={isLoading}
-                  >
-                    {isLoading ? "Kayıt yapılıyor..." : "Kayıt Ol"}
-                  </Button>
+                  <Button type="submit" className="w-full" disabled={isLoading}>{isLoading ? "Kayıt yapılıyor..." : "Kayıt Ol"}</Button>
                 </form>
               </CardContent>
             </Card>

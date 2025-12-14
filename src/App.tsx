@@ -10,8 +10,7 @@ import { store } from "@/store";
 import Index from "./pages/Index";
 import Auth from "./pages/Auth";
 import MyAppointments from "./pages/MyAppointments";
-import Barbers from "./pages/Barbers";
-import BarberProfile from "./pages/BarberProfile";
+import BookAppointment from "./pages/BookAppointment";
 import NotFound from "./pages/NotFound";
 import { AdminLayout } from "./layouts/AdminLayout";
 import AdminEarnings from "./pages/admin/AdminEarnings";
@@ -48,6 +47,24 @@ function ProtectedRoute({ children }: { children: React.ReactNode }) {
   return <>{children}</>;
 }
 
+function AdminRoute({ children }: { children: React.ReactNode }) {
+  const { user, profile, loading } = useAuth();
+  
+  if (loading) {
+    return (
+      <div className="min-h-screen flex items-center justify-center">
+        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
+      </div>
+    );
+  }
+  
+  if (!user || profile?.role !== 'admin') {
+    return <Navigate to="/" replace />;
+  }
+  
+  return <>{children}</>;
+}
+
 function AuthRoute({ children }: { children: React.ReactNode }) {
   const { user, profile, loading } = useAuth();
   
@@ -61,7 +78,7 @@ function AuthRoute({ children }: { children: React.ReactNode }) {
   
   if (user) {
     // Redirect based on role
-    if (profile?.role === 'barber') {
+    if (profile?.role === 'admin') {
       return <Navigate to="/admin/earnings" replace />;
     }
     return <Navigate to="/my-appointments" replace />;
@@ -82,16 +99,15 @@ function AppRoutes() {
         <Route path="/" element={<Index />} />
         <Route path="/auth" element={<AuthRoute><Auth /></AuthRoute>} />
         <Route path="/my-appointments" element={<ProtectedRoute><MyAppointments /></ProtectedRoute>} />
-        <Route path="/barbers" element={<ProtectedRoute><Barbers /></ProtectedRoute>} />
-        <Route path="/barber/:slug" element={<ProtectedRoute><BarberProfile /></ProtectedRoute>} />
+        <Route path="/book" element={<ProtectedRoute><BookAppointment /></ProtectedRoute>} />
         
         {/* Admin Routes */}
-        <Route path="/admin/earnings" element={<ProtectedRoute><AdminLayout><AdminEarnings /></AdminLayout></ProtectedRoute>} />
-        <Route path="/admin/appointments" element={<ProtectedRoute><AdminLayout><AdminAppointments /></AdminLayout></ProtectedRoute>} />
-        <Route path="/admin/services" element={<ProtectedRoute><AdminLayout><AdminServices /></AdminLayout></ProtectedRoute>} />
-        <Route path="/admin/working-hours" element={<ProtectedRoute><AdminLayout><AdminWorkingHours /></AdminLayout></ProtectedRoute>} />
-        <Route path="/admin/shop-status" element={<ProtectedRoute><AdminLayout><AdminShopStatus /></AdminLayout></ProtectedRoute>} />
-        <Route path="/admin/settings" element={<ProtectedRoute><AdminLayout><AdminSettings /></AdminLayout></ProtectedRoute>} />
+        <Route path="/admin/earnings" element={<AdminRoute><AdminLayout><AdminEarnings /></AdminLayout></AdminRoute>} />
+        <Route path="/admin/appointments" element={<AdminRoute><AdminLayout><AdminAppointments /></AdminLayout></AdminRoute>} />
+        <Route path="/admin/services" element={<AdminRoute><AdminLayout><AdminServices /></AdminLayout></AdminRoute>} />
+        <Route path="/admin/working-hours" element={<AdminRoute><AdminLayout><AdminWorkingHours /></AdminLayout></AdminRoute>} />
+        <Route path="/admin/shop-status" element={<AdminRoute><AdminLayout><AdminShopStatus /></AdminLayout></AdminRoute>} />
+        <Route path="/admin/settings" element={<AdminRoute><AdminLayout><AdminSettings /></AdminLayout></AdminRoute>} />
         
         {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
         <Route path="*" element={<NotFound />} />
