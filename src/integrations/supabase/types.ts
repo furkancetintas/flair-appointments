@@ -18,7 +18,6 @@ export type Database = {
         Row: {
           appointment_date: string
           appointment_time: string
-          barber_id: string
           created_at: string
           customer_id: string
           id: string
@@ -31,7 +30,6 @@ export type Database = {
         Insert: {
           appointment_date: string
           appointment_time: string
-          barber_id: string
           created_at?: string
           customer_id: string
           id?: string
@@ -44,7 +42,6 @@ export type Database = {
         Update: {
           appointment_date?: string
           appointment_time?: string
-          barber_id?: string
           created_at?: string
           customer_id?: string
           id?: string
@@ -56,69 +53,9 @@ export type Database = {
         }
         Relationships: [
           {
-            foreignKeyName: "appointments_barber_id_fkey"
-            columns: ["barber_id"]
-            isOneToOne: false
-            referencedRelation: "barbers"
-            referencedColumns: ["id"]
-          },
-          {
             foreignKeyName: "appointments_customer_id_fkey"
             columns: ["customer_id"]
             isOneToOne: false
-            referencedRelation: "profiles"
-            referencedColumns: ["id"]
-          },
-        ]
-      }
-      barbers: {
-        Row: {
-          address: string | null
-          appointment_duration: number | null
-          created_at: string
-          description: string | null
-          id: string
-          price_range: string | null
-          profile_id: string
-          services: string[] | null
-          shop_name: string
-          shop_status: string | null
-          updated_at: string
-          working_hours: Json | null
-        }
-        Insert: {
-          address?: string | null
-          appointment_duration?: number | null
-          created_at?: string
-          description?: string | null
-          id?: string
-          price_range?: string | null
-          profile_id: string
-          services?: string[] | null
-          shop_name: string
-          shop_status?: string | null
-          updated_at?: string
-          working_hours?: Json | null
-        }
-        Update: {
-          address?: string | null
-          appointment_duration?: number | null
-          created_at?: string
-          description?: string | null
-          id?: string
-          price_range?: string | null
-          profile_id?: string
-          services?: string[] | null
-          shop_name?: string
-          shop_status?: string | null
-          updated_at?: string
-          working_hours?: Json | null
-        }
-        Relationships: [
-          {
-            foreignKeyName: "barbers_profile_id_fkey"
-            columns: ["profile_id"]
-            isOneToOne: true
             referencedRelation: "profiles"
             referencedColumns: ["id"]
           },
@@ -128,7 +65,6 @@ export type Database = {
         Row: {
           amount: number
           appointment_id: string | null
-          barber_id: string
           created_at: string
           earned_date: string
           id: string
@@ -138,7 +74,6 @@ export type Database = {
         Insert: {
           amount: number
           appointment_id?: string | null
-          barber_id: string
           created_at?: string
           earned_date?: string
           id?: string
@@ -148,14 +83,21 @@ export type Database = {
         Update: {
           amount?: number
           appointment_id?: string | null
-          barber_id?: string
           created_at?: string
           earned_date?: string
           id?: string
           service_name?: string
           updated_at?: string
         }
-        Relationships: []
+        Relationships: [
+          {
+            foreignKeyName: "earnings_appointment_id_fkey"
+            columns: ["appointment_id"]
+            isOneToOne: true
+            referencedRelation: "appointments"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       profiles: {
         Row: {
@@ -190,22 +132,103 @@ export type Database = {
         }
         Relationships: []
       }
+      shop_settings: {
+        Row: {
+          address: string | null
+          appointment_duration: number | null
+          created_at: string
+          description: string | null
+          id: string
+          phone: string | null
+          price_range: string | null
+          services: string[] | null
+          shop_name: string
+          shop_status: string
+          updated_at: string
+          working_hours: Json | null
+        }
+        Insert: {
+          address?: string | null
+          appointment_duration?: number | null
+          created_at?: string
+          description?: string | null
+          id?: string
+          phone?: string | null
+          price_range?: string | null
+          services?: string[] | null
+          shop_name?: string
+          shop_status?: string
+          updated_at?: string
+          working_hours?: Json | null
+        }
+        Update: {
+          address?: string | null
+          appointment_duration?: number | null
+          created_at?: string
+          description?: string | null
+          id?: string
+          phone?: string | null
+          price_range?: string | null
+          services?: string[] | null
+          shop_name?: string
+          shop_status?: string
+          updated_at?: string
+          working_hours?: Json | null
+        }
+        Relationships: []
+      }
+      user_roles: {
+        Row: {
+          created_at: string
+          id: string
+          role: Database["public"]["Enums"]["app_role"]
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          role: Database["public"]["Enums"]["app_role"]
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          role?: Database["public"]["Enums"]["app_role"]
+          user_id?: string
+        }
+        Relationships: []
+      }
     }
     Views: {
       [_ in never]: never
     }
     Functions: {
-      check_appointment_availability: {
+      check_appointment_availability:
+        | {
+            Args: {
+              appointment_date_param: string
+              appointment_time_param: string
+            }
+            Returns: boolean
+          }
+        | {
+            Args: {
+              appointment_date_param: string
+              appointment_time_param: string
+              barber_id_param: string
+            }
+            Returns: boolean
+          }
+      has_role: {
         Args: {
-          appointment_date_param: string
-          appointment_time_param: string
-          barber_id_param: string
+          _role: Database["public"]["Enums"]["app_role"]
+          _user_id: string
         }
         Returns: boolean
       }
     }
     Enums: {
-      [_ in never]: never
+      app_role: "admin" | "customer"
     }
     CompositeTypes: {
       [_ in never]: never
@@ -332,6 +355,8 @@ export type CompositeTypes<
 
 export const Constants = {
   public: {
-    Enums: {},
+    Enums: {
+      app_role: ["admin", "customer"],
+    },
   },
 } as const

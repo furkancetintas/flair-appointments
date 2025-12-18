@@ -48,7 +48,8 @@ function ProtectedRoute({ children }: { children: React.ReactNode }) {
 }
 
 function AdminRoute({ children }: { children: React.ReactNode }) {
-  const { user, profile, loading } = useAuth();
+  const { user, loading } = useAuth();
+  const isAdmin = store.getState().auth.isAdmin;
   
   if (loading) {
     return (
@@ -58,7 +59,7 @@ function AdminRoute({ children }: { children: React.ReactNode }) {
     );
   }
   
-  if (!user || profile?.role !== 'admin') {
+  if (!user || !isAdmin) {
     return <Navigate to="/" replace />;
   }
   
@@ -66,7 +67,8 @@ function AdminRoute({ children }: { children: React.ReactNode }) {
 }
 
 function AuthRoute({ children }: { children: React.ReactNode }) {
-  const { user, profile, loading } = useAuth();
+  const { user, loading } = useAuth();
+  const isAdmin = store.getState().auth.isAdmin;
   
   if (loading) {
     return (
@@ -78,8 +80,8 @@ function AuthRoute({ children }: { children: React.ReactNode }) {
   
   if (user) {
     // Redirect based on role
-    if (profile?.role === 'admin') {
-      return <Navigate to="/admin/earnings" replace />;
+    if (isAdmin) {
+      return <Navigate to="/admin/appointments" replace />;
     }
     return <Navigate to="/my-appointments" replace />;
   }

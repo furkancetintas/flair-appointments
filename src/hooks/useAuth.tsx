@@ -8,6 +8,7 @@ interface AuthContextType {
   user: any;
   session: any;
   profile: any;
+  isAdmin: boolean;
   loading: boolean;
   signUp: (email: string, password: string, fullName: string) => Promise<{ error: any }>;
   signIn: (email: string, password: string) => Promise<{ error: any }>;
@@ -18,7 +19,7 @@ const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
 export function AuthProvider({ children }: { children: React.ReactNode }) {
   const dispatch = useAppDispatch();
-  const { user, session, profile, loading } = useAppSelector((state) => state.auth);
+  const { user, session, profile, isAdmin, loading } = useAppSelector((state) => state.auth);
 
   useEffect(() => {
     // Initialize auth on mount
@@ -32,6 +33,13 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
           session,
           profile: null // Profile will be fetched in the slice
         }));
+        
+        // Re-initialize to get profile and admin status
+        if (session?.user) {
+          setTimeout(() => {
+            dispatch(initializeAuth());
+          }, 0);
+        }
       }
     );
 
@@ -57,6 +65,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       user,
       session,
       profile,
+      isAdmin,
       loading,
       signUp,
       signIn,

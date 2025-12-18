@@ -37,10 +37,10 @@ const Index = () => {
         <div className="text-center max-w-4xl mx-auto">
           <div className="flex items-center justify-center gap-4 mb-8">
             <div className="bg-primary rounded-full p-4"><Scissors className="h-12 w-12 text-primary-foreground" /></div>
-            <h1 className="text-5xl font-bold text-foreground">BarberBook</h1>
+            <h1 className="text-5xl font-bold text-foreground">Ömrüm Kuaför</h1>
           </div>
-          <h2 className="text-3xl md:text-4xl font-bold text-foreground mb-6">Berber randevularınızı <span className="text-primary">kolayca yönetin</span></h2>
-          <p className="text-xl text-muted-foreground mb-8 max-w-2xl mx-auto">Modern ve kullanıcı dostu arayüzümüzle randevu almak artık çok kolay.</p>
+          <h2 className="text-3xl md:text-4xl font-bold text-foreground mb-6">Profesyonel berber hizmetleri <span className="text-primary">bir tık uzağınızda</span></h2>
+          <p className="text-xl text-muted-foreground mb-8 max-w-2xl mx-auto">Hızlı ve kolay randevu sistemi ile zaman kaybetmeden randevunuzu alın.</p>
           <div className="flex flex-col sm:flex-row gap-4 justify-center">
             <Link to="/auth"><Button size="lg" className="flex items-center gap-2 text-lg px-8 py-6">Hemen Başla<ArrowRight className="h-5 w-5" /></Button></Link>
             <Link to="/book"><Button variant="outline" size="lg" className="flex items-center gap-2 text-lg px-8 py-6"><Scissors className="h-5 w-5" />Randevu Al</Button></Link>
