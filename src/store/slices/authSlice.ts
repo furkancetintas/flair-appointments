@@ -8,7 +8,6 @@ export interface Profile {
   user_id: string;
   full_name: string;
   email: string;
-  role: 'customer' | 'admin';
   phone?: string;
   created_at: string;
   updated_at: string;
@@ -18,6 +17,7 @@ interface AuthState {
   user: User | null;
   session: Session | null;
   profile: Profile | null;
+  isAdmin: boolean;
   loading: boolean;
   error: string | null;
 }
@@ -26,8 +26,20 @@ const initialState: AuthState = {
   user: null,
   session: null,
   profile: null,
+  isAdmin: false,
   loading: true,
   error: null,
+};
+
+// Helper function to check if user is admin
+const checkIsAdmin = async (userId: string): Promise<boolean> => {
+  const { data } = await (supabase as any)
+    .from('user_roles')
+    .select('role')
+    .eq('user_id', userId)
+    .eq('role', 'admin')
+    .maybeSingle();
+  return !!data;
 };
 
 // Async thunks
@@ -48,10 +60,13 @@ export const initializeAuth = createAsyncThunk(
           throw error;
         }
 
+        const isAdmin = await checkIsAdmin(session.user.id);
+
         return {
           user: session.user,
           session,
           profile: profile || null,
+          isAdmin,
         };
       }
 
@@ -59,6 +74,7 @@ export const initializeAuth = createAsyncThunk(
         user: null,
         session: null,
         profile: null,
+        isAdmin: false,
       };
     } catch (error: any) {
       return rejectWithValue(error.message);
@@ -83,7 +99,6 @@ export const signUp = createAsyncThunk(
           emailRedirectTo: redirectUrl,
           data: {
             full_name: fullName,
-            role: 'customer', // Only customers can register
           },
         },
       });
@@ -116,11 +131,14 @@ export const signIn = createAsyncThunk(
         .eq('user_id', data.user.id)
         .single();
 
+      const isAdmin = await checkIsAdmin(data.user.id);
+
       toast.success('Başarıyla giriş yaptınız!');
       return {
         user: data.user,
         session: data.session,
         profile: profile || null,
+        isAdmin,
       };
     } catch (error: any) {
       toast.error(error.message);
@@ -154,12 +172,9 @@ export const updateProfile = createAsyncThunk(
       
       if (!currentProfile) throw new Error('No profile found');
 
-      // Remove role from update data to prevent escalation
-      const { role, ...safeProfileData } = profileData;
-
       const { data, error } = await supabase
         .from('profiles')
-        .update(safeProfileData)
+        .update(profileData)
         .eq('id', currentProfile.id)
         .select()
         .single();
@@ -177,10 +192,11 @@ const authSlice = createSlice({
   name: 'auth',
   initialState,
   reducers: {
-    setAuthState: (state, action: PayloadAction<{ user: User | null; session: Session | null; profile: Profile | null }>) => {
+    setAuthState: (state, action: PayloadAction<{ user: User | null; session: Session | null; profile: Profile | null; isAdmin?: boolean }>) => {
       state.user = action.payload.user;
       state.session = action.payload.session;
       state.profile = action.payload.profile;
+      state.isAdmin = action.payload.isAdmin ?? false;
       state.loading = false;
     },
     clearError: (state) => {
@@ -199,6 +215,7 @@ const authSlice = createSlice({
         state.user = action.payload.user;
         state.session = action.payload.session;
         state.profile = action.payload.profile as Profile | null;
+        state.isAdmin = action.payload.isAdmin;
       })
       .addCase(initializeAuth.rejected, (state, action) => {
         state.loading = false;
@@ -228,6 +245,7 @@ const authSlice = createSlice({
         state.user = action.payload.user;
         state.session = action.payload.session;
         state.profile = action.payload.profile as Profile | null;
+        state.isAdmin = action.payload.isAdmin;
       })
       .addCase(signIn.rejected, (state, action) => {
         state.loading = false;
@@ -244,6 +262,7 @@ const authSlice = createSlice({
         state.user = null;
         state.session = null;
         state.profile = null;
+        state.isAdmin = false;
       })
       .addCase(signOut.rejected, (state, action) => {
         state.loading = false;
