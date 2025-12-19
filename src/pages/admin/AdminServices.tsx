@@ -6,45 +6,175 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Badge } from "@/components/ui/badge";
-import { Plus, X, Wrench } from "lucide-react";
+import { Plus, X, Wrench, Banknote } from "lucide-react";
 import { toast } from "sonner";
+
+interface Service {
+  name: string;
+  price: number;
+}
 
 export default function AdminServices() {
   const dispatch = useAppDispatch();
   const { settings, updateLoading } = useAppSelector((state) => state.shopSettings);
-  const [services, setServices] = useState<string[]>([]);
-  const [newService, setNewService] = useState("");
+  const [services, setServices] = useState<Service[]>([]);
+  const [newServiceName, setNewServiceName] = useState("");
+  const [newServicePrice, setNewServicePrice] = useState("");
 
   useEffect(() => { dispatch(fetchShopSettings()); }, [dispatch]);
-  useEffect(() => { if (settings?.services) setServices(settings.services); }, [settings]);
+  
+  useEffect(() => { 
+    if (settings?.services) {
+      // Handle both old string array format and new object format
+      const servicesData = settings.services as any;
+      if (Array.isArray(servicesData)) {
+        if (servicesData.length > 0 && typeof servicesData[0] === 'string') {
+          // Old format: string array
+          setServices(servicesData.map((s: string) => ({ name: s, price: 100 })));
+        } else {
+          // New format: object array
+          setServices(servicesData);
+        }
+      }
+    }
+  }, [settings]);
 
-  const handleAddService = () => { if (newService.trim() && !services.includes(newService.trim())) { setServices([...services, newService.trim()]); setNewService(""); } };
-  const handleRemoveService = (s: string) => setServices(services.filter(x => x !== s));
-  const handleSave = async () => { await dispatch(updateShopSettings({ services })); };
+  const handleAddService = () => { 
+    const name = newServiceName.trim();
+    const price = parseInt(newServicePrice) || 100;
+    
+    if (name && !services.some(s => s.name === name)) { 
+      setServices([...services, { name, price }]); 
+      setNewServiceName(""); 
+      setNewServicePrice("");
+    } else if (!name) {
+      toast.error("Hizmet adı boş olamaz");
+    } else {
+      toast.error("Bu hizmet zaten mevcut");
+    }
+  };
+  
+  const handleRemoveService = (name: string) => setServices(services.filter(s => s.name !== name));
+  
+  const handleUpdatePrice = (name: string, newPrice: number) => {
+    setServices(services.map(s => s.name === name ? { ...s, price: newPrice } : s));
+  };
+  
+  const handleSave = async () => { 
+    await dispatch(updateShopSettings({ services: services as any })); 
+  };
 
-  const defaults = ["Saç Kesimi", "Sakal Tıraşı", "Saç + Sakal", "Yıkama", "Şekillendirme"];
+  const defaults: Service[] = [
+    { name: "Saç Kesimi", price: 100 },
+    { name: "Sakal Tıraşı", price: 80 },
+    { name: "Saç + Sakal", price: 150 },
+    { name: "Yıkama", price: 30 },
+    { name: "Şekillendirme", price: 50 }
+  ];
 
   return (
     <div className="space-y-6">
-      <div><h2 className="text-2xl font-bold mb-2">Hizmetler</h2><p className="text-muted-foreground">Sunduğunuz hizmetleri yönetin</p></div>
+      <div>
+        <h2 className="text-2xl font-bold mb-2">Hizmetler</h2>
+        <p className="text-muted-foreground">Sunduğunuz hizmetleri ve fiyatlarını yönetin</p>
+      </div>
+      
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
         <Card>
-          <CardHeader><CardTitle className="flex items-center gap-2"><Wrench className="h-5 w-5" />Mevcut Hizmetler</CardTitle><CardDescription>{services.length} adet</CardDescription></CardHeader>
+          <CardHeader>
+            <CardTitle className="flex items-center gap-2">
+              <Wrench className="h-5 w-5" />
+              Mevcut Hizmetler
+            </CardTitle>
+            <CardDescription>{services.length} adet hizmet</CardDescription>
+          </CardHeader>
           <CardContent className="space-y-4">
-            {services.length === 0 ? <p className="text-muted-foreground text-center py-8">Henüz hizmet eklenmemiş</p> : (
-              <div className="flex flex-wrap gap-2">
-                {services.map((s, i) => <Badge key={i} variant="secondary" className="flex items-center gap-2">{s}<Button size="sm" variant="ghost" className="h-4 w-4 p-0" onClick={() => handleRemoveService(s)}><X className="h-3 w-3" /></Button></Badge>)}
+            {services.length === 0 ? (
+              <p className="text-muted-foreground text-center py-8">Henüz hizmet eklenmemiş</p>
+            ) : (
+              <div className="space-y-3">
+                {services.map((service, i) => (
+                  <div key={i} className="flex items-center gap-3 p-3 bg-secondary/50 rounded-lg">
+                    <span className="flex-1 font-medium">{service.name}</span>
+                    <div className="flex items-center gap-2">
+                      <Banknote className="h-4 w-4 text-muted-foreground" />
+                      <Input
+                        type="number"
+                        value={service.price}
+                        onChange={(e) => handleUpdatePrice(service.name, parseInt(e.target.value) || 0)}
+                        className="w-24 h-8"
+                        min={0}
+                      />
+                      <span className="text-sm text-muted-foreground">₺</span>
+                    </div>
+                    <Button 
+                      size="sm" 
+                      variant="ghost" 
+                      className="h-8 w-8 p-0 text-destructive hover:text-destructive" 
+                      onClick={() => handleRemoveService(service.name)}
+                    >
+                      <X className="h-4 w-4" />
+                    </Button>
+                  </div>
+                ))}
               </div>
             )}
-            {services.length > 0 && <Button onClick={handleSave} disabled={updateLoading} className="w-full mt-4">{updateLoading ? "Kaydediliyor..." : "Kaydet"}</Button>}
+            {services.length > 0 && (
+              <Button onClick={handleSave} disabled={updateLoading} className="w-full mt-4">
+                {updateLoading ? "Kaydediliyor..." : "Değişiklikleri Kaydet"}
+              </Button>
+            )}
           </CardContent>
         </Card>
+        
         <Card>
-          <CardHeader><CardTitle className="flex items-center gap-2"><Plus className="h-5 w-5" />Yeni Hizmet</CardTitle></CardHeader>
+          <CardHeader>
+            <CardTitle className="flex items-center gap-2">
+              <Plus className="h-5 w-5" />
+              Yeni Hizmet Ekle
+            </CardTitle>
+          </CardHeader>
           <CardContent className="space-y-4">
-            <div className="flex gap-2"><Input value={newService} onChange={(e) => setNewService(e.target.value)} onKeyPress={(e) => e.key === 'Enter' && handleAddService()} placeholder="Hizmet adı" /><Button onClick={handleAddService}><Plus className="h-4 w-4" /></Button></div>
-            <div className="flex flex-wrap gap-2">{defaults.filter(s => !services.includes(s)).map(s => <Button key={s} variant="outline" size="sm" onClick={() => setServices([...services, s])}>+ {s}</Button>)}</div>
+            <div className="space-y-3">
+              <div className="space-y-2">
+                <Label>Hizmet Adı</Label>
+                <Input 
+                  value={newServiceName} 
+                  onChange={(e) => setNewServiceName(e.target.value)} 
+                  placeholder="Örn: Saç Boyama" 
+                />
+              </div>
+              <div className="space-y-2">
+                <Label>Fiyat (₺)</Label>
+                <Input 
+                  type="number"
+                  value={newServicePrice} 
+                  onChange={(e) => setNewServicePrice(e.target.value)} 
+                  placeholder="100"
+                  min={0}
+                />
+              </div>
+              <Button onClick={handleAddService} className="w-full">
+                <Plus className="h-4 w-4 mr-2" />
+                Hizmet Ekle
+              </Button>
+            </div>
+            
+            <div className="pt-4 border-t">
+              <p className="text-sm text-muted-foreground mb-3">Önerilen hizmetler:</p>
+              <div className="flex flex-wrap gap-2">
+                {defaults.filter(d => !services.some(s => s.name === d.name)).map(d => (
+                  <Button 
+                    key={d.name} 
+                    variant="outline" 
+                    size="sm" 
+                    onClick={() => setServices([...services, d])}
+                  >
+                    + {d.name} ({d.price}₺)
+                  </Button>
+                ))}
+              </div>
+            </div>
           </CardContent>
         </Card>
       </div>

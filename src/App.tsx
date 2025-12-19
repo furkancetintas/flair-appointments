@@ -11,6 +11,7 @@ import Index from "./pages/Index";
 import Auth from "./pages/Auth";
 import MyAppointments from "./pages/MyAppointments";
 import BookAppointment from "./pages/BookAppointment";
+import Profile from "./pages/Profile";
 import NotFound from "./pages/NotFound";
 import { AdminLayout } from "./layouts/AdminLayout";
 import AdminEarnings from "./pages/admin/AdminEarnings";
@@ -102,6 +103,7 @@ function AppRoutes() {
         <Route path="/auth" element={<AuthRoute><Auth /></AuthRoute>} />
         <Route path="/my-appointments" element={<ProtectedRoute><MyAppointments /></ProtectedRoute>} />
         <Route path="/book" element={<ProtectedRoute><BookAppointment /></ProtectedRoute>} />
+        <Route path="/profile" element={<ProtectedRoute><Profile /></ProtectedRoute>} />
         
         {/* Admin Routes */}
         <Route path="/admin/earnings" element={<AdminRoute><AdminLayout><AdminEarnings /></AdminLayout></AdminRoute>} />

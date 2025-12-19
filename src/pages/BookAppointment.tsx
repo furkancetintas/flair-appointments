@@ -26,6 +26,7 @@ const BookAppointment = () => {
   const [selectedDate, setSelectedDate] = useState<Date | undefined>();
   const [selectedTime, setSelectedTime] = useState<string>('');
   const [selectedService, setSelectedService] = useState<string>('');
+  const [selectedPrice, setSelectedPrice] = useState<number>(0);
   const [notes, setNotes] = useState('');
   const [bookedTimes, setBookedTimes] = useState<string[]>([]);
 
@@ -89,7 +90,7 @@ const BookAppointment = () => {
       appointment_date: format(selectedDate, 'yyyy-MM-dd'),
       appointment_time: selectedTime,
       service: selectedService,
-      price: 100, // Default price
+      price: selectedPrice,
       notes: notes || undefined,
     }));
 
@@ -221,16 +222,33 @@ const BookAppointment = () => {
                   </CardTitle>
                 </CardHeader>
                 <CardContent>
-                  <Select value={selectedService} onValueChange={setSelectedService}>
+                  <Select 
+                    value={selectedService} 
+                    onValueChange={(value) => {
+                      setSelectedService(value);
+                      // Find the service and set its price
+                      const services = settings.services as any[];
+                      const service = services?.find((s: any) => 
+                        typeof s === 'string' ? s === value : s.name === value
+                      );
+                      if (service) {
+                        setSelectedPrice(typeof service === 'string' ? 100 : service.price);
+                      }
+                    }}
+                  >
                     <SelectTrigger>
                       <SelectValue placeholder="Hizmet seçin" />
                     </SelectTrigger>
                     <SelectContent>
-                      {settings.services?.map((service) => (
-                        <SelectItem key={service} value={service}>
-                          {service}
-                        </SelectItem>
-                      ))}
+                      {(settings.services as any[])?.map((service: any, idx: number) => {
+                        const name = typeof service === 'string' ? service : service.name;
+                        const price = typeof service === 'string' ? 100 : service.price;
+                        return (
+                          <SelectItem key={idx} value={name}>
+                            {name} - {price}₺
+                          </SelectItem>
+                        );
+                      })}
                     </SelectContent>
                   </Select>
                 </CardContent>

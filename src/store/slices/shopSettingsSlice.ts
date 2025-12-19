@@ -2,12 +2,17 @@ import { createSlice, createAsyncThunk } from '@reduxjs/toolkit';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
 
+export interface ServiceItem {
+  name: string;
+  price: number;
+}
+
 export interface ShopSettings {
   id: string;
   shop_name: string;
   address: string | null;
   description: string | null;
-  services: string[];
+  services: ServiceItem[];
   working_hours: any;
   price_range: string | null;
   shop_status: 'open' | 'closed';

@@ -141,7 +141,7 @@ export type Database = {
           id: string
           phone: string | null
           price_range: string | null
-          services: string[] | null
+          services: Json | null
           shop_name: string
           shop_status: string
           updated_at: string
@@ -155,7 +155,7 @@ export type Database = {
           id?: string
           phone?: string | null
           price_range?: string | null
-          services?: string[] | null
+          services?: Json | null
           shop_name?: string
           shop_status?: string
           updated_at?: string
@@ -169,7 +169,7 @@ export type Database = {
           id?: string
           phone?: string | null
           price_range?: string | null
-          services?: string[] | null
+          services?: Json | null
           shop_name?: string
           shop_status?: string
           updated_at?: string

@@ -15,7 +15,7 @@ const Auth = () => {
   const { signIn, signUp, loading } = useAuth();
   
   const [loginForm, setLoginForm] = useState({ email: '', password: '' });
-  const [signupForm, setSignupForm] = useState({ email: '', password: '', fullName: '' });
+  const [signupForm, setSignupForm] = useState({ email: '', password: '', fullName: '', phone: '' });
   const [isLoading, setIsLoading] = useState(false);
 
   const handleLogin = async (e: React.FormEvent) => {
@@ -45,7 +45,7 @@ const Auth = () => {
     }
     
     setIsLoading(true);
-    const { error } = await signUp(signupForm.email, signupForm.password, signupForm.fullName);
+    const { error } = await signUp(signupForm.email, signupForm.password, signupForm.fullName, signupForm.phone);
     if (!error) {
       const loginTab = document.querySelector('[value="login"]') as HTMLElement;
       loginTab?.click();
@@ -69,7 +69,7 @@ const Auth = () => {
             <div className="bg-primary rounded-lg p-3">
               <Scissors className="h-8 w-8 text-primary-foreground" />
             </div>
-            <h1 className="text-3xl font-bold text-foreground">BarberBook</h1>
+            <h1 className="text-3xl font-bold text-foreground">Ömrüm Kuaför</h1>
           </div>
           <p className="text-muted-foreground">Berber randevularınızı kolayca yönetin</p>
         </div>
@@ -113,6 +113,10 @@ const Auth = () => {
                   <div className="space-y-2">
                     <Label htmlFor="signup-name">Ad Soyad</Label>
                     <Input id="signup-name" type="text" value={signupForm.fullName} onChange={(e) => setSignupForm(prev => ({ ...prev, fullName: e.target.value }))} placeholder="Adınız Soyadınız" required />
+                  </div>
+                  <div className="space-y-2">
+                    <Label htmlFor="signup-phone">Telefon Numarası</Label>
+                    <Input id="signup-phone" type="tel" value={signupForm.phone} onChange={(e) => setSignupForm(prev => ({ ...prev, phone: e.target.value }))} placeholder="0532 123 45 67" required />
                   </div>
                   <div className="space-y-2">
                     <Label htmlFor="signup-email">E-posta</Label>
