@@ -25,13 +25,16 @@ export const signupSchema = z.object({
     .min(1, { message: 'E-posta adresi gereklidir' })
     .email({ message: 'Geçerli bir e-posta adresi giriniz' })
     .max(255, { message: 'E-posta adresi 255 karakterden az olmalıdır' }),
+  phone: z
+    .string()
+    .trim()
+    .min(10, { message: 'Telefon numarası en az 10 karakter olmalıdır' })
+    .max(20, { message: 'Telefon numarası 20 karakterden az olmalıdır' })
+    .regex(/^[0-9+\-\s()]+$/, { message: 'Geçerli bir telefon numarası giriniz' }),
   password: z
     .string()
     .min(6, { message: 'Şifre en az 6 karakter olmalıdır' })
     .max(100, { message: 'Şifre 100 karakterden az olmalıdır' }),
-  role: z.enum(['customer', 'barber'], {
-    required_error: 'Hesap türü seçiniz',
-  }),
 });
 
 export type LoginFormData = z.infer<typeof loginSchema>;

@@ -1,4 +1,4 @@
-import { LogOut, Menu } from "lucide-react";
+import { LogOut, Menu, User } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useAuth } from "@/hooks/useAuth";
 import { Link, useNavigate } from "react-router-dom";
@@ -24,6 +24,7 @@ export function Header() {
             <Link to="/book" className="text-foreground hover:text-primary transition-colors font-medium">Randevu Al</Link>
             {user && !isAdmin && <Link to="/my-appointments" className="text-foreground hover:text-primary transition-colors font-medium">Randevularım</Link>}
             {user && isAdmin && <Link to="/admin/appointments" className="text-foreground hover:text-primary transition-colors font-medium">Admin Panel</Link>}
+            {user && <Link to="/profile" className="text-foreground hover:text-primary transition-colors font-medium">Profilim</Link>}
           </nav>
           <div className="flex items-center gap-3">
             <div className="hidden md:flex items-center gap-3">
@@ -36,6 +37,7 @@ export function Header() {
                   <Link to="/book" className="text-lg font-medium" onClick={() => setIsOpen(false)}>Randevu Al</Link>
                   {user && !isAdmin && <Link to="/my-appointments" className="text-lg font-medium" onClick={() => setIsOpen(false)}>Randevularım</Link>}
                   {user && isAdmin && <Link to="/admin/appointments" className="text-lg font-medium" onClick={() => setIsOpen(false)}>Admin Panel</Link>}
+                  {user && <Link to="/profile" className="text-lg font-medium flex items-center gap-2" onClick={() => setIsOpen(false)}><User className="h-4 w-4" />Profilim</Link>}
                   <div className="border-t pt-6">{user ? <Button variant="outline" className="w-full" onClick={() => { handleSignOut(); setIsOpen(false); }}><LogOut className="h-4 w-4 mr-2" />Çıkış</Button> : <div className="flex flex-col gap-2"><Link to="/auth" onClick={() => setIsOpen(false)}><Button variant="outline" className="w-full">Giriş</Button></Link><Link to="/auth" onClick={() => setIsOpen(false)}><Button className="w-full">Kayıt Ol</Button></Link></div>}</div>
                 </div>
               </SheetContent>

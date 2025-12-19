@@ -84,10 +84,11 @@ export const initializeAuth = createAsyncThunk(
 
 export const signUp = createAsyncThunk(
   'auth/signUp',
-  async ({ email, password, fullName }: {
+  async ({ email, password, fullName, phone }: {
     email: string;
     password: string;
     fullName: string;
+    phone: string;
   }, { rejectWithValue }) => {
     try {
       const redirectUrl = `${window.location.origin}/`;
@@ -99,6 +100,7 @@ export const signUp = createAsyncThunk(
           emailRedirectTo: redirectUrl,
           data: {
             full_name: fullName,
+            phone: phone,
           },
         },
       });

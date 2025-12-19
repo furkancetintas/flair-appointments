@@ -10,7 +10,7 @@ interface AuthContextType {
   profile: any;
   isAdmin: boolean;
   loading: boolean;
-  signUp: (email: string, password: string, fullName: string) => Promise<{ error: any }>;
+  signUp: (email: string, password: string, fullName: string, phone: string) => Promise<{ error: any }>;
   signIn: (email: string, password: string) => Promise<{ error: any }>;
   signOut: () => Promise<void>;
 }
@@ -46,8 +46,8 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     return () => subscription.unsubscribe();
   }, [dispatch]);
 
-  const signUp = async (email: string, password: string, fullName: string) => {
-    const result = await dispatch(signUpAction({ email, password, fullName }));
+  const signUp = async (email: string, password: string, fullName: string, phone: string) => {
+    const result = await dispatch(signUpAction({ email, password, fullName, phone }));
     return { error: result.meta.requestStatus === 'rejected' ? result.payload : null };
   };
 
