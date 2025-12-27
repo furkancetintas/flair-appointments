@@ -219,6 +219,7 @@ export type Database = {
             }
             Returns: boolean
           }
+      delete_old_appointments: { Args: never; Returns: undefined }
       has_role: {
         Args: {
           _role: Database["public"]["Enums"]["app_role"]

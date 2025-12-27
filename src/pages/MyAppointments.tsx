@@ -2,13 +2,14 @@ import { useEffect } from 'react';
 import { useAuth } from '@/hooks/useAuth';
 import { useAppDispatch } from '@/hooks/useAppDispatch';
 import { useAppSelector } from '@/hooks/useAppSelector';
-import { fetchCustomerAppointments } from '@/store/slices/appointmentsSlice';
+import { fetchCustomerAppointments, deleteAppointment } from '@/store/slices/appointmentsSlice';
 import { fetchShopSettings } from '@/store/slices/shopSettingsSlice';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
-import { Calendar, Clock, Scissors, LogOut, Plus } from 'lucide-react';
+import { Calendar, Clock, Scissors, LogOut, Plus, Trash2 } from 'lucide-react';
 import { Link, Navigate } from 'react-router-dom';
+import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from '@/components/ui/alert-dialog';
 
 const MyAppointments = () => {
   const { profile, signOut } = useAuth();
@@ -41,6 +42,14 @@ const MyAppointments = () => {
       case 'completed': return 'Tamamlandı';
       default: return status;
     }
+  };
+
+  const handleDeleteAppointment = async (appointmentId: string) => {
+    await dispatch(deleteAppointment(appointmentId));
+  };
+
+  const canDelete = (status: string) => {
+    return status === 'pending' || status === 'cancelled';
   };
 
   // Redirect admin to admin panel
@@ -119,9 +128,34 @@ const MyAppointments = () => {
                           {appointment.service}
                         </CardDescription>
                       </div>
-                      <Badge className={getStatusColor(appointment.status)}>
-                        {getStatusText(appointment.status)}
-                      </Badge>
+                      <div className="flex items-center gap-2">
+                        <Badge className={getStatusColor(appointment.status)}>
+                          {getStatusText(appointment.status)}
+                        </Badge>
+                        {canDelete(appointment.status) && (
+                          <AlertDialog>
+                            <AlertDialogTrigger asChild>
+                              <Button variant="destructive" size="icon" className="h-8 w-8">
+                                <Trash2 className="h-4 w-4" />
+                              </Button>
+                            </AlertDialogTrigger>
+                            <AlertDialogContent>
+                              <AlertDialogHeader>
+                                <AlertDialogTitle>Randevuyu Sil</AlertDialogTitle>
+                                <AlertDialogDescription>
+                                  Bu randevuyu kalıcı olarak silmek istediğinizden emin misiniz? Bu işlem geri alınamaz.
+                                </AlertDialogDescription>
+                              </AlertDialogHeader>
+                              <AlertDialogFooter>
+                                <AlertDialogCancel>İptal</AlertDialogCancel>
+                                <AlertDialogAction onClick={() => handleDeleteAppointment(appointment.id)}>
+                                  Sil
+                                </AlertDialogAction>
+                              </AlertDialogFooter>
+                            </AlertDialogContent>
+                          </AlertDialog>
+                        )}
+                      </div>
                     </div>
                   </CardHeader>
                   <CardContent>
