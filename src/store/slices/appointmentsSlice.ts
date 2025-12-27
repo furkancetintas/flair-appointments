@@ -208,6 +208,28 @@ export const fetchAppointmentById = createAsyncThunk(
   }
 );
 
+// Delete appointment
+export const deleteAppointment = createAsyncThunk(
+  'appointments/deleteAppointment',
+  async (appointmentId: string, { rejectWithValue }) => {
+    try {
+      const { error } = await supabase
+        .from('appointments')
+        .delete()
+        .eq('id', appointmentId);
+
+      if (error) throw error;
+
+      toast.success('Randevu başarıyla silindi!');
+      return appointmentId;
+    } catch (error: any) {
+      console.error('Error deleting appointment:', error);
+      toast.error('Randevu silinirken bir hata oluştu');
+      return rejectWithValue(error.message);
+    }
+  }
+);
+
 const appointmentsSlice = createSlice({
   name: 'appointments',
   initialState,
@@ -281,6 +303,13 @@ const appointmentsSlice = createSlice({
         if (customerIndex >= 0) {
           state.appointments[customerIndex] = updatedAppointment;
         }
+      })
+      
+      // Delete appointment
+      .addCase(deleteAppointment.fulfilled, (state, action) => {
+        const deletedId = action.payload;
+        state.appointments = state.appointments.filter(apt => apt.id !== deletedId);
+        state.adminAppointments = state.adminAppointments.filter(apt => apt.id !== deletedId);
       });
   },
 });
