@@ -227,12 +227,17 @@ const MyAppointments = () => {
                         <div className="flex flex-col md:flex-row justify-between gap-4">
                           {/* Service Info */}
                           <div className="space-y-4">
-                            <div>
-                              <div className="flex items-center gap-2 mb-1">
-                                <Scissors className="h-4 w-4 text-primary" />
-                                <span className="text-xs text-muted-foreground uppercase tracking-wider">Hizmet</span>
+                            <div className="flex flex-col sm:flex-row sm:items-center gap-2 sm:gap-4">
+                              <div className="flex-1">
+                                <div className="flex items-center gap-2 mb-1">
+                                  <Scissors className="h-4 w-4 text-primary" />
+                                  <span className="text-xs text-muted-foreground uppercase tracking-wider">Hizmet</span>
+                                </div>
+                                <h3 className="text-lg font-semibold text-foreground">{appointment.service}</h3>
                               </div>
-                              <h3 className="text-lg font-semibold text-foreground">{appointment.service}</h3>
+                              <div className="bg-muted/50 rounded-lg px-3 py-1.5 text-xs font-mono text-muted-foreground shrink-0">
+                                ID: {appointment.id.slice(0, 8)}...
+                              </div>
                             </div>
 
                             <div className="flex flex-wrap gap-4 text-sm">
