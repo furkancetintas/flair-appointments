@@ -185,7 +185,7 @@ const Profile = () => {
                   E-posta Durumu
                 </CardTitle>
               </CardHeader>
-              <CardContent className="space-y-4 flex-wrap">
+              <CardContent className="space-y-4 flex flex-wrap">
                 <div className="flex items-center justify-between p-4 bg-secondary/50 rounded-lg">
                   <div className="flex items-center gap-3">
                     <Mail className="h-5 w-5 text-muted-foreground" />
