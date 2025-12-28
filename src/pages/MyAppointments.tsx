@@ -236,7 +236,7 @@ const MyAppointments = () => {
                                 <h3 className="text-lg font-semibold text-foreground">{appointment.service}</h3>
                               </div>
                               <div className="bg-muted/50 rounded-lg px-3 py-1.5 text-xs font-mono text-muted-foreground shrink-0">
-                                ID: {appointment.id.slice(0, 8)}...
+                                Randevu ID: {appointment.id}
                               </div>
                             </div>
 
