@@ -218,7 +218,7 @@ const MyAppointments = () => {
                       {/* Date Section */}
                       <div className="bg-gradient-to-br from-primary to-primary/80 text-primary-foreground p-6 md:w-48 flex flex-col items-center justify-center text-center">
                         <Clock className="h-6 w-6 mb-2 opacity-80" />
-                        <p className="text-3xl font-bold">{appointment.appointment_time}</p>
+                        <p className="text-3xl font-bold">{appointment.appointment_time.slice(0,5)}</p>
                         <p className="text-sm opacity-80 mt-1">{formatDate(appointment.appointment_date)}</p>
                       </div>
 
