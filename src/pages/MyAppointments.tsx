@@ -74,7 +74,8 @@ const MyAppointments = () => {
   };
 
   const canDelete = (status: string) => {
-    return status === 'pending' || status === 'cancelled';
+    // Müşteriler tüm randevularını silebilir
+    return true;
   };
 
   const formatDate = (dateString: string) => {
