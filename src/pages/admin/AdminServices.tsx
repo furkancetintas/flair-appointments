@@ -75,27 +75,27 @@ export default function AdminServices() {
   return (
     <div className="space-y-6">
       <div>
-        <h2 className="text-2xl font-bold mb-2">Hizmetler</h2>
-        <p className="text-muted-foreground">Sunduğunuz hizmetleri ve fiyatlarını yönetin</p>
+        <h2 className="text-xl sm:text-2xl font-bold mb-2">Hizmetler</h2>
+        <p className="text-sm sm:text-base text-muted-foreground">Sunduğunuz hizmetleri ve fiyatlarını yönetin</p>
       </div>
       
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 sm:gap-6">
         <Card>
           <CardHeader>
-            <CardTitle className="flex items-center gap-2">
+            <CardTitle className="flex items-center gap-2 text-base sm:text-lg">
               <Wrench className="h-5 w-5" />
               Mevcut Hizmetler
             </CardTitle>
-            <CardDescription>{services.length} adet hizmet</CardDescription>
+            <CardDescription className="text-xs sm:text-sm">{services.length} adet hizmet</CardDescription>
           </CardHeader>
           <CardContent className="space-y-4">
             {services.length === 0 ? (
-              <p className="text-muted-foreground text-center py-8">Henüz hizmet eklenmemiş</p>
+              <p className="text-muted-foreground text-center py-8 text-sm">Henüz hizmet eklenmemiş</p>
             ) : (
               <div className="space-y-3">
                 {services.map((service, i) => (
-                  <div key={i} className="flex items-center gap-3 p-3 bg-secondary/50 rounded-lg">
-                    <span className="flex-1 font-medium">{service.name}</span>
+                  <div key={i} className="flex flex-col sm:flex-row sm:items-center gap-2 sm:gap-3 p-3 bg-secondary/50 rounded-lg">
+                    <span className="flex-1 font-medium text-sm sm:text-base">{service.name}</span>
                     <div className="flex items-center gap-2">
                       <Banknote className="h-4 w-4 text-muted-foreground" />
                       <Input

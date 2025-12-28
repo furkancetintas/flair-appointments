@@ -31,10 +31,10 @@ export function AdminLayout({ children }: AdminLayoutProps) {
         
         <div className="flex-1 flex flex-col">
           <header className="h-14 border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60 sticky top-0 z-40">
-            <div className="flex items-center justify-between h-full px-4">
-              <div className="flex items-center gap-4">
+            <div className="flex items-center justify-between h-full px-3 sm:px-4">
+              <div className="flex items-center gap-2 sm:gap-4">
                 <SidebarTrigger />
-                <h1 className="text-xl font-bold text-primary">Ömrüm Kuaför - Admin</h1>
+                <h1 className="text-sm sm:text-xl font-bold text-primary truncate">Ömrüm Kuaför<span className="hidden sm:inline"> - Admin</span></h1>
               </div>
               <Button
                 variant="ghost"
@@ -48,7 +48,7 @@ export function AdminLayout({ children }: AdminLayoutProps) {
             </div>
           </header>
           
-          <main className="flex-1 p-6">
+          <main className="flex-1 p-3 sm:p-6">
             {children}
           </main>
         </div>

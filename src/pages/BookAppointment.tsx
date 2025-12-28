@@ -270,12 +270,13 @@ const BookAppointment = () => {
                 <CardContent>
                   {selectedDate ? (
                     timeSlots.length > 0 ? (
-                      <div className="grid grid-cols-3 gap-2">
+                      <div className="grid grid-cols-2 sm:grid-cols-3 gap-2">
                         {timeSlots.map((time) => (
                           <Button
                             key={time}
                             variant={selectedTime === time ? 'default' : 'outline'}
                             size="sm"
+                            className="text-xs sm:text-sm"
                             onClick={() => setSelectedTime(time)}
                           >
                             {time}
