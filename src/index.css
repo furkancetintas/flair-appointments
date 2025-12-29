@@ -6,6 +6,10 @@
 All colors MUST be HSL.
 */
 
+html{
+  font-family: "Open Sans", sans-serif;
+}
+
 @layer base {
   :root {
     --background: 0 15% 98%;
