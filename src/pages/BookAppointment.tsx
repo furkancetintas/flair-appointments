@@ -43,7 +43,11 @@ const BookAppointment = () => {
   const loadBookedTimes = async (date: string) => {
     const result = await dispatch(fetchAppointmentsForDate(date));
     if (result.meta.requestStatus === 'fulfilled') {
-      const times = (result.payload as any[]).map((apt: any) => apt.appointment_time);
+      // Supabase TIME columns often come back as HH:mm:ss (e.g. 15:30:00)
+      // but our UI slots are HH:mm, so normalize for matching.
+      const times = (result.payload as any[])
+        .map((apt: any) => String(apt.appointment_time ?? '').slice(0, 5))
+        .filter(Boolean);
       setBookedTimes(times);
     }
   };
