@@ -220,6 +220,12 @@ export type Database = {
             Returns: boolean
           }
       delete_old_appointments: { Args: never; Returns: undefined }
+      get_booked_times_for_date: {
+        Args: { target_date: string }
+        Returns: {
+          appointment_time: string
+        }[]
+      }
       has_role: {
         Args: {
           _role: Database["public"]["Enums"]["app_role"]

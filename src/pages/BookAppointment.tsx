@@ -3,14 +3,16 @@ import { useAuth } from '@/hooks/useAuth';
 import { useAppDispatch } from '@/hooks/useAppDispatch';
 import { useAppSelector } from '@/hooks/useAppSelector';
 import { fetchShopSettings } from '@/store/slices/shopSettingsSlice';
-import { createAppointment, fetchAppointmentsForDate } from '@/store/slices/appointmentsSlice';
+import { createAppointment } from '@/store/slices/appointmentsSlice';
+import { supabase } from '@/integrations/supabase/client';
+import { Badge } from '@/components/ui/badge';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
 import { Calendar } from '@/components/ui/calendar';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { Scissors, Calendar as CalendarIcon, Clock, MapPin, ArrowLeft } from 'lucide-react';
+import { Scissors, Calendar as CalendarIcon, Clock, MapPin, ArrowLeft, Ban } from 'lucide-react';
 import { Link, useNavigate } from 'react-router-dom';
 import { format, addDays, isAfter, isBefore, isSameDay, startOfToday } from 'date-fns';
 import { tr } from 'date-fns/locale';
@@ -29,6 +31,7 @@ const BookAppointment = () => {
   const [selectedPrice, setSelectedPrice] = useState<number>(0);
   const [notes, setNotes] = useState('');
   const [bookedTimes, setBookedTimes] = useState<string[]>([]);
+  const [loadingTimes, setLoadingTimes] = useState(false);
 
   useEffect(() => {
     dispatch(fetchShopSettings());
@@ -41,14 +44,29 @@ const BookAppointment = () => {
   }, [selectedDate]);
 
   const loadBookedTimes = async (date: string) => {
-    const result = await dispatch(fetchAppointmentsForDate(date));
-    if (result.meta.requestStatus === 'fulfilled') {
-      // Supabase TIME columns often come back as HH:mm:ss (e.g. 15:30:00)
-      // but our UI slots are HH:mm, so normalize for matching.
-      const times = (result.payload as any[])
-        .map((apt: any) => String(apt.appointment_time ?? '').slice(0, 5))
+    setLoadingTimes(true);
+    try {
+      // Use secure RPC function that bypasses RLS to get all booked times
+      const { data, error } = await supabase.rpc('get_booked_times_for_date', {
+        target_date: date,
+      });
+
+      if (error) {
+        console.error('Error fetching booked times:', error);
+        setBookedTimes([]);
+        return;
+      }
+
+      // Normalize time format from HH:mm:ss to HH:mm
+      const times = (data || [])
+        .map((row: { appointment_time: string }) => String(row.appointment_time ?? '').slice(0, 5))
         .filter(Boolean);
       setBookedTimes(times);
+    } catch (err) {
+      console.error('Error loading booked times:', err);
+      setBookedTimes([]);
+    } finally {
+      setLoadingTimes(false);
     }
   };
 
@@ -311,19 +329,38 @@ const BookAppointment = () => {
                   {selectedDate ? (
                     timeSlots.length > 0 ? (
                       <div className="grid grid-cols-2 sm:grid-cols-3 gap-2">
-                        {timeSlots.map((slot) => (
-                          <Button
-                            key={slot.time}
-                            variant={selectedTime === slot.time ? 'default' : 'outline'}
-                            size="sm"
-                            className={`text-xs sm:text-sm ${slot.isBooked ? 'opacity-50 line-through' : ''}`}
-                            onClick={() => !slot.isBooked && setSelectedTime(slot.time)}
-                            disabled={slot.isBooked}
-                          >
-                            {slot.time}
-                            {slot.isBooked && <span className="ml-1 text-[10px]">(Dolu)</span>}
-                          </Button>
-                        ))}
+                        {loadingTimes ? (
+                          <div className="col-span-full flex items-center justify-center py-4">
+                            <div className="animate-spin rounded-full h-6 w-6 border-b-2 border-primary"></div>
+                          </div>
+                        ) : (
+                          timeSlots.map((slot) => (
+                            <Button
+                              key={slot.time}
+                              variant={selectedTime === slot.time ? 'default' : 'outline'}
+                              size="sm"
+                              className={`relative text-xs sm:text-sm transition-all ${
+                                slot.isBooked 
+                                  ? 'bg-destructive/10 border-destructive/30 text-destructive hover:bg-destructive/10 cursor-not-allowed' 
+                                  : ''
+                              }`}
+                              onClick={() => !slot.isBooked && setSelectedTime(slot.time)}
+                              disabled={slot.isBooked}
+                            >
+                              {slot.isBooked ? (
+                                <span className="flex items-center gap-1.5">
+                                  <Ban className="h-3 w-3" />
+                                  <span className="line-through">{slot.time}</span>
+                                  <Badge variant="destructive" className="text-[9px] px-1 py-0 h-4 ml-1">
+                                    Dolu
+                                  </Badge>
+                                </span>
+                              ) : (
+                                slot.time
+                              )}
+                            </Button>
+                          ))
+                        )}
                       </div>
                     ) : (
                       <p className="text-muted-foreground text-center py-4">
