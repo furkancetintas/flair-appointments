@@ -56,7 +56,7 @@ const BookAppointment = () => {
 
     if (!dayHours || dayHours.closed) return [];
 
-    const slots: string[] = [];
+    const slots: { time: string; isBooked: boolean }[] = [];
     const [startHour, startMin] = dayHours.start.split(':').map(Number);
     const [endHour, endMin] = dayHours.end.split(':').map(Number);
     const interval = settings.appointment_duration || 30;
@@ -69,9 +69,10 @@ const BookAppointment = () => {
       const minute = current % 60;
       const timeString = `${hour.toString().padStart(2, '0')}:${minute.toString().padStart(2, '0')}`;
       
-      if (!bookedTimes.includes(timeString)) {
-        slots.push(timeString);
-      }
+      slots.push({
+        time: timeString,
+        isBooked: bookedTimes.includes(timeString)
+      });
       
       current += interval;
     }
@@ -271,15 +272,17 @@ const BookAppointment = () => {
                   {selectedDate ? (
                     timeSlots.length > 0 ? (
                       <div className="grid grid-cols-2 sm:grid-cols-3 gap-2">
-                        {timeSlots.map((time) => (
+                        {timeSlots.map((slot) => (
                           <Button
-                            key={time}
-                            variant={selectedTime === time ? 'default' : 'outline'}
+                            key={slot.time}
+                            variant={selectedTime === slot.time ? 'default' : 'outline'}
                             size="sm"
-                            className="text-xs sm:text-sm"
-                            onClick={() => setSelectedTime(time)}
+                            className={`text-xs sm:text-sm ${slot.isBooked ? 'opacity-50 line-through' : ''}`}
+                            onClick={() => !slot.isBooked && setSelectedTime(slot.time)}
+                            disabled={slot.isBooked}
                           >
-                            {time}
+                            {slot.time}
+                            {slot.isBooked && <span className="ml-1 text-[10px]">(Dolu)</span>}
                           </Button>
                         ))}
                       </div>
