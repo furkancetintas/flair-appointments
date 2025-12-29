@@ -12,7 +12,7 @@ import { Calendar } from '@/components/ui/calendar';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Scissors, Calendar as CalendarIcon, Clock, MapPin, ArrowLeft } from 'lucide-react';
 import { Link, useNavigate } from 'react-router-dom';
-import { format, addDays, isAfter, isBefore, startOfToday } from 'date-fns';
+import { format, addDays, isAfter, isBefore, isSameDay, startOfToday } from 'date-fns';
 import { tr } from 'date-fns/locale';
 import { toast } from 'sonner';
 
@@ -65,19 +65,26 @@ const BookAppointment = () => {
     const [endHour, endMin] = dayHours.end.split(':').map(Number);
     const interval = settings.appointment_duration || 30;
 
+    const isToday = isSameDay(selectedDate, new Date());
+    const now = new Date();
+    const nowMinutes = now.getHours() * 60 + now.getMinutes();
+
     let current = startHour * 60 + startMin;
     const end = endHour * 60 + endMin;
 
     while (current < end) {
-      const hour = Math.floor(current / 60);
-      const minute = current % 60;
-      const timeString = `${hour.toString().padStart(2, '0')}:${minute.toString().padStart(2, '0')}`;
-      
-      slots.push({
-        time: timeString,
-        isBooked: bookedTimes.includes(timeString)
-      });
-      
+      // If selected day is today, don't show past times
+      if (!isToday || current > nowMinutes) {
+        const hour = Math.floor(current / 60);
+        const minute = current % 60;
+        const timeString = `${hour.toString().padStart(2, '0')}:${minute.toString().padStart(2, '0')}`;
+
+        slots.push({
+          time: timeString,
+          isBooked: bookedTimes.includes(timeString),
+        });
+      }
+
       current += interval;
     }
 
@@ -88,6 +95,19 @@ const BookAppointment = () => {
     if (!profile || !selectedDate || !selectedTime || !selectedService) {
       toast.error('Lütfen tüm alanları doldurun');
       return;
+    }
+
+    // Prevent booking a past time for today
+    if (isSameDay(selectedDate, new Date())) {
+      const [h, m] = selectedTime.split(':').map(Number);
+      const slotMinutes = h * 60 + m;
+      const now = new Date();
+      const nowMinutes = now.getHours() * 60 + now.getMinutes();
+
+      if (slotMinutes <= nowMinutes) {
+        toast.error('Geçmiş bir saate randevu alınamaz');
+        return;
+      }
     }
 
     const result = await dispatch(createAppointment({
@@ -107,7 +127,7 @@ const BookAppointment = () => {
   const isDateDisabled = (date: Date) => {
     const today = startOfToday();
     const maxDate = addDays(today, 30);
-    
+
     if (isBefore(date, today) || isAfter(date, maxDate)) {
       return true;
     }
@@ -116,8 +136,23 @@ const BookAppointment = () => {
 
     const dayOfWeek = format(date, 'EEEE').toLowerCase();
     const dayHours = settings.working_hours[dayOfWeek];
-    
-    return dayHours?.closed === true;
+
+    if (dayHours?.closed === true) return true;
+
+    // If it's today and working hours already passed, disable booking for today
+    if (isSameDay(date, today) && dayHours?.start && dayHours?.end) {
+      const interval = settings.appointment_duration || 30;
+      const [endHour, endMin] = dayHours.end.split(':').map(Number);
+      const endMinutes = endHour * 60 + endMin;
+      const lastSlotStart = endMinutes - interval;
+
+      const now = new Date();
+      const nowMinutes = now.getHours() * 60 + now.getMinutes();
+
+      if (nowMinutes >= lastSlotStart) return true;
+    }
+
+    return false;
   };
 
   if (shopLoading || !settings) {
@@ -292,7 +327,9 @@ const BookAppointment = () => {
                       </div>
                     ) : (
                       <p className="text-muted-foreground text-center py-4">
-                        Bu tarihte müsait saat bulunmuyor
+                        {isSameDay(selectedDate, new Date())
+                          ? 'Bugün için müsait saat kalmadı'
+                          : 'Bu tarihte müsait saat bulunmuyor'}
                       </p>
                     )
                   ) : (
