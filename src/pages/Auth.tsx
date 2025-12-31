@@ -98,11 +98,12 @@ const Auth = () => {
                   </div>
                   <Button type="submit" className="w-full" disabled={isLoading}>{isLoading ? "Giriş yapılıyor..." : "Giriş Yap"}</Button>
                 </form>
-
-                <p>
-                  Hesabın yok mu?
-                  <TabsTrigger value="signup">Kayıt Ol</TabsTrigger>
-                </p>
+                <TabsList>
+                  <p>
+                    Hesabın yok mu?
+                    <TabsTrigger value="signup">Kayıt Ol</TabsTrigger>
+                  </p>
+                </TabsList>
               </CardContent>
             </Card>
           </TabsContent>
@@ -133,11 +134,12 @@ const Auth = () => {
                   </div>
                   <Button type="submit" className="w-full" disabled={isLoading}>{isLoading ? "Kayıt yapılıyor..." : "Kayıt Ol"}</Button>
                 </form>
-
-                <p>
-                  Zaten bir hesabın var mı?
-                  <TabsTrigger value="signup">Giriş Yap</TabsTrigger>
-                </p>
+                <TabsList>
+                  <p>
+                    Zaten bir hesabın var mı?
+                    <TabsTrigger value="signup">Giriş Yap</TabsTrigger>
+                  </p>
+                </TabsList>
               </CardContent>
             </Card>
           </TabsContent>
