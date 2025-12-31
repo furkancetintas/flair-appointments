@@ -89,7 +89,7 @@ const Index = () => {
             <div className="bg-primary rounded-full p-3 sm:p-4">
               <Scissors className="h-8 w-8 sm:h-12 sm:w-12 text-primary-foreground" />
             </div>
-            <h1 className="text-3xl sm:text-5xl font-bold text-foreground">Ömrüm Kuaför</h1>
+            <h1 className="text-3xl sm:text-5xl font-bold text-foreground">Ömrüm Erkek Kuaför</h1>
           </div>
           <h2 className="text-2xl sm:text-3xl md:text-4xl font-bold text-foreground mb-4 sm:mb-6 px-2">
             Profesyonel berber hizmetleri <span className="text-primary">bir tık uzağınızda</span>
