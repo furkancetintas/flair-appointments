@@ -98,12 +98,6 @@ const Auth = () => {
                   </div>
                   <Button type="submit" className="w-full" disabled={isLoading}>{isLoading ? "Giriş yapılıyor..." : "Giriş Yap"}</Button>
                 </form>
-                <div className="space-y-2">
-                  <p className="text-sm text-muted-foreground">
-                    Hesabın yok mu?
-                    <TabsTrigger value="signup">Kayıt Ol</TabsTrigger>
-                  </p>
-                </div>
               </CardContent>
             </Card>
           </TabsContent>
@@ -134,12 +128,6 @@ const Auth = () => {
                   </div>
                   <Button type="submit" className="w-full" disabled={isLoading}>{isLoading ? "Kayıt yapılıyor..." : "Kayıt Ol"}</Button>
                 </form>
-                <div className="space-y-2">
-                  <p className="text-sm text-muted-foreground">
-                    Zaten bir hesabın var mı?
-                    <TabsTrigger value="signup">Giriş Yap</TabsTrigger>
-                  </p>
-                </div>
               </CardContent>
             </Card>
           </TabsContent>
