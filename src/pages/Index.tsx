@@ -86,13 +86,10 @@ const Index = () => {
       <div className="container mx-auto px-4 py-8 sm:py-16">
         <div className="text-center max-w-4xl mx-auto">
           <div className="flex items-center justify-center gap-3 sm:gap-4 mb-6 sm:mb-8">
-            <div className="bg-primary rounded-full p-3 sm:p-4">
-              <Scissors className="h-8 w-8 sm:h-12 sm:w-12 text-primary-foreground" />
-            </div>
-            <h1 className="text-3xl sm:text-5xl font-bold text-foreground">Ömrüm Erkek Kuaför</h1>
+            <h1 className="text-3xl sm:text-5xl font-bold text-foreground">Ömrüm Erkek Kuaförü</h1>
           </div>
           <h2 className="text-2xl sm:text-3xl md:text-4xl font-bold text-foreground mb-4 sm:mb-6 px-2">
-            Profesyonel berber hizmetleri <span className="text-primary">bir tık uzağınızda</span>
+            Profesyonel berber hizmetleri ile <span className="text-primary">bir tık uzağınızda</span>
           </h2>
           <p className="text-lg sm:text-xl text-muted-foreground mb-6 sm:mb-8 max-w-2xl mx-auto px-2">
             Hızlı ve kolay randevu sistemi ile zaman kaybetmeden randevunuzu alın.
