@@ -52,7 +52,7 @@ export function AdminSidebar() {
         {!collapsed && (
           <div className="flex items-center gap-2">
             <Store className="h-6 w-6 text-primary" />
-            <h2 className="font-semibold text-lg">Berber Dükkanım | Panel</h2>
+            <h2 className="font-semibold text-lg">Panel</h2>
           </div>
         )}
       </SidebarHeader>
