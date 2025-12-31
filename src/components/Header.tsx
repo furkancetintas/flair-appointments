@@ -1,4 +1,4 @@
-import { LogOut, Menu, User } from "lucide-react";
+import { LogOut, Menu, Scissors, User } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useAuth } from "@/hooks/useAuth";
 import { Link, useNavigate } from "react-router-dom";
@@ -19,7 +19,10 @@ export function Header() {
     <header className="h-16 border-b bg-background/95 backdrop-blur sticky top-0 z-50">
       <div className="container mx-auto h-full px-4">
         <div className="flex items-center justify-between h-full">
-          <Link to="/" className="flex items-center"><h1 className="text-2xl font-bold text-primary">Ömrüm Kuaför</h1></Link>
+          <div className="p-3 sm:p-4 flex items-center">
+            <Scissors className="h-8 w-8 sm:h-12 sm:w-12 text-primary" />
+            <Link to="/" className="flex items-center"><h1 className="text-2xl font-bold text-primary">Ömrüm Kuaför</h1></Link>
+          </div>
           <nav className="hidden md:flex items-center gap-6">
             <Link to="/book" className="text-foreground hover:text-primary transition-colors font-medium">Randevu Al</Link>
             {user && !isAdmin && <Link to="/my-appointments" className="text-foreground hover:text-primary transition-colors font-medium">Randevularım</Link>}
