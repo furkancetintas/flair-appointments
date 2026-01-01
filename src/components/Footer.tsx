@@ -69,7 +69,6 @@ export const Footer = () => {
               <li>Sakal Tıraşı</li>
               <li>Saç Yıkama</li>
               <li>Cilt Bakımı</li>
-              <li>Saç Boyama</li>
             </ul>
           </div>
 
@@ -80,13 +79,13 @@ export const Footer = () => {
               <div className="flex items-start gap-3 text-sm">
                 <MapPin className="w-4 h-4 text-primary mt-0.5 flex-shrink-0" />
                 <span className="text-muted-foreground">
-                  Merkez Mahallesi, Atatürk Caddesi No:123, İstanbul
+                  Bademlik, Bademlik Yolu Cd. No:184, 06300 Keçiören/Ankara
                 </span>
               </div>
               <div className="flex items-center gap-3 text-sm">
                 <Phone className="w-4 h-4 text-primary flex-shrink-0" />
-                <a href="tel:+905551234567" className="text-muted-foreground hover:text-primary transition-colors">
-                  +90 555 123 45 67
+                <a href="tel:+905323223109" className="text-muted-foreground hover:text-primary transition-colors">
+                  +90 532 322 31 09
                 </a>
               </div>
               <div className="flex items-start gap-3 text-sm">
