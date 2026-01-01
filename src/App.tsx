@@ -6,6 +6,7 @@ import { BrowserRouter, Routes, Route, Navigate, useLocation } from "react-route
 import { Provider } from "react-redux";
 import { AuthProvider, useAuth } from "@/hooks/useAuth";
 import { Header } from "@/components/Header";
+import { Footer } from "@/components/Footer";
 import { store } from "@/store";
 import Index from "./pages/Index";
 import Auth from "./pages/Auth";
@@ -116,6 +117,7 @@ function AppRoutes() {
         {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
         <Route path="*" element={<NotFound />} />
       </Routes>
+      {!isAdminRoute && !isAuthRoute && <Footer />}
     </>
   );
 }
