@@ -11,7 +11,7 @@ interface SEOProps {
 }
 
 const SITE_NAME = 'Ömrüm Erkek Kuaförü';
-const BASE_URL = 'https://omrum-kuafor.lovable.app';
+const BASE_URL = 'https://omrumkuafor.com';
 const DEFAULT_IMAGE = `${BASE_URL}/og-image.png`;
 
 export const SEO = ({

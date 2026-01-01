@@ -24,4 +24,4 @@ Disallow: /admin/
 Disallow: /my-appointments
 Disallow: /profile
 
-Sitemap: https://omrum-kuafor.lovable.app/sitemap.xml
+Sitemap: https://omrumkuafor.com/sitemap.xml
