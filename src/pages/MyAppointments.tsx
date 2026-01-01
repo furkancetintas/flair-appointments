@@ -10,6 +10,7 @@ import { Badge } from '@/components/ui/badge';
 import { Calendar, Clock, Scissors, LogOut, Plus, Trash2, MapPin, Phone, FileText, User, Sparkles } from 'lucide-react';
 import { Link, Navigate } from 'react-router-dom';
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from '@/components/ui/alert-dialog';
+import SEO from '@/components/SEO';
 
 const MyAppointments = () => {
   const { profile, signOut } = useAuth();
@@ -109,7 +110,14 @@ const MyAppointments = () => {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-background via-secondary/30 to-accent/10">
+    <>
+      <SEO 
+        title="Randevularım"
+        description="Ömrüm Erkek Kuaför randevularınızı görüntüleyin ve yönetin."
+        canonical="/my-appointments"
+        noindex={true}
+      />
+      <main className="min-h-screen bg-gradient-to-br from-background via-secondary/30 to-accent/10">
       {/* Decorative Elements */}
       <div className="fixed inset-0 overflow-hidden pointer-events-none">
         <div className="absolute -top-40 -right-40 w-80 h-80 bg-primary/5 rounded-full blur-3xl"></div>
@@ -328,7 +336,8 @@ const MyAppointments = () => {
           </div>
         )}
       </div>
-    </div>
+      </main>
+    </>
   );
 };
 

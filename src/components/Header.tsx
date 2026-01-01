@@ -34,7 +34,7 @@ export function Header() {
               {user ? <Button variant="ghost" size="sm" onClick={handleSignOut} className="gap-2"><LogOut className="h-4 w-4" /><span>Çıkış</span></Button> : <><Link to="/auth"><Button variant="ghost" size="sm">Giriş</Button></Link><Link to="/auth"><Button size="sm">Kayıt Ol</Button></Link></>}
             </div>
             <Sheet open={isOpen} onOpenChange={setIsOpen}>
-              <SheetTrigger asChild className="md:hidden"><Button color="bg-primary" variant="classic" size="icon"><Menu className="h-5 w-5" /></Button></SheetTrigger>
+              <SheetTrigger asChild className="md:hidden"><Button variant="default" size="icon"><Menu className="h-5 w-5" /></Button></SheetTrigger>
               <SheetContent side="right" className="w-[300px]">
                 <div className="flex flex-col gap-6 mt-8">
                   <Link to="/book" className="text-lg font-medium" onClick={() => setIsOpen(false)}>Randevu Al</Link>
