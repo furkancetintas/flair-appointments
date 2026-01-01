@@ -12,6 +12,7 @@ import { Badge } from '@/components/ui/badge';
 import { User, Mail, Phone, Lock, Shield, ArrowLeft, CheckCircle, XCircle } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import { toast } from 'sonner';
+import SEO from '@/components/SEO';
 
 const Profile = () => {
   const { user, profile, isAdmin } = useAuth();
@@ -120,8 +121,15 @@ const Profile = () => {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-background via-secondary/30 to-accent/20">
-      <div className="container mx-auto px-4 py-8">
+    <>
+      <SEO 
+        title="Profilim"
+        description="Ömrüm Erkek Kuaför hesap bilgilerinizi güncelleyin."
+        canonical="/profile"
+        noindex={true}
+      />
+      <main className="min-h-screen bg-gradient-to-br from-background via-secondary/30 to-accent/20">
+        <div className="container mx-auto px-4 py-8">
         <div className="max-w-2xl mx-auto">
           {/* Header */}
           <div className="mb-8">
@@ -310,8 +318,9 @@ const Profile = () => {
             </Card>
           </div>
         </div>
-      </div>
-    </div>
+        </div>
+      </main>
+    </>
   );
 };
 

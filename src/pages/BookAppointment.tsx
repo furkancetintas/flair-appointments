@@ -17,6 +17,7 @@ import { Link, useNavigate } from 'react-router-dom';
 import { format, addDays, isAfter, isBefore, isSameDay, startOfToday } from 'date-fns';
 import { tr } from 'date-fns/locale';
 import { toast } from 'sonner';
+import SEO from '@/components/SEO';
 
 const BookAppointment = () => {
   const { profile } = useAuth();
@@ -205,8 +206,14 @@ const BookAppointment = () => {
   const timeSlots = generateTimeSlots();
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-background via-secondary/30 to-accent/20">
-      <div className="container mx-auto px-4 py-8">
+    <>
+      <SEO 
+        title="Randevu Al"
+        description="Ömrüm Erkek Kuaför'de online randevu alın. Tarih ve saat seçerek kolayca randevunuzu oluşturun."
+        canonical="/book"
+      />
+      <main className="min-h-screen bg-gradient-to-br from-background via-secondary/30 to-accent/20">
+        <div className="container mx-auto px-4 py-8">
         <div className="max-w-4xl mx-auto">
           {/* Header */}
           <div className="mb-8">
@@ -403,8 +410,9 @@ const BookAppointment = () => {
             </div>
           </div>
         </div>
-      </div>
-    </div>
+        </div>
+      </main>
+    </>
   );
 };
 

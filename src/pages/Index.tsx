@@ -13,6 +13,7 @@ import { tr } from 'date-fns/locale';
 import { toast } from 'sonner';
 import { Badge } from '@/components/ui/badge';
 import { supabase } from '@/integrations/supabase/client';
+import SEO from '@/components/SEO';
 
 const Index = () => {
   const dispatch = useAppDispatch();
@@ -82,7 +83,13 @@ const Index = () => {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-background via-secondary/30 to-accent/20">
+    <>
+      <SEO 
+        title="Ana Sayfa"
+        description="Ömrüm Erkek Kuaför'de online randevu alın, beklemeden traş olun. Profesyonel erkek kuaförü hizmetleri."
+        canonical="/"
+      />
+      <main className="min-h-screen bg-gradient-to-br from-background via-secondary/30 to-accent/20">
       <div className="container mx-auto px-4 py-8 sm:py-16">
         <div className="text-center max-w-4xl mx-auto">
           <div className="flex items-center justify-center gap-3 sm:gap-4 mb-6 sm:mb-8">
@@ -279,32 +286,33 @@ const Index = () => {
       </Dialog>
 
       {/* Features Section */}
-      <div className="container mx-auto px-4 py-12 sm:py-16">
+      <section className="container mx-auto px-4 py-12 sm:py-16">
         <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-6 sm:gap-8 max-w-5xl mx-auto">
-          <div className="text-center p-6 rounded-xl bg-card border border-border hover:shadow-lg transition-shadow">
+          <article className="text-center p-6 rounded-xl bg-card border border-border hover:shadow-lg transition-shadow">
             <div className="bg-primary/10 rounded-full p-4 w-16 h-16 mx-auto mb-4 flex items-center justify-center">
               <Calendar className="h-8 w-8 text-primary" />
             </div>
-            <h4 className="text-lg sm:text-xl font-semibold mb-2 sm:mb-3">Kolay Randevu</h4>
+            <h3 className="text-lg sm:text-xl font-semibold mb-2 sm:mb-3">Kolay Randevu</h3>
             <p className="text-muted-foreground text-sm sm:text-base">Birkaç tıkla randevu alın</p>
-          </div>
-          <div className="text-center p-6 rounded-xl bg-card border border-border hover:shadow-lg transition-shadow">
+          </article>
+          <article className="text-center p-6 rounded-xl bg-card border border-border hover:shadow-lg transition-shadow">
             <div className="bg-primary/10 rounded-full p-4 w-16 h-16 mx-auto mb-4 flex items-center justify-center">
               <Users className="h-8 w-8 text-primary" />
             </div>
-            <h4 className="text-lg sm:text-xl font-semibold mb-2 sm:mb-3">Kolay Yönetim</h4>
+            <h3 className="text-lg sm:text-xl font-semibold mb-2 sm:mb-3">Kolay Yönetim</h3>
             <p className="text-muted-foreground text-sm sm:text-base">Randevularınızı takip edin</p>
-          </div>
-          <div className="text-center p-6 rounded-xl bg-card border border-border hover:shadow-lg transition-shadow sm:col-span-2 md:col-span-1">
+          </article>
+          <article className="text-center p-6 rounded-xl bg-card border border-border hover:shadow-lg transition-shadow sm:col-span-2 md:col-span-1">
             <div className="bg-primary/10 rounded-full p-4 w-16 h-16 mx-auto mb-4 flex items-center justify-center">
               <Star className="h-8 w-8 text-primary" />
             </div>
-            <h4 className="text-lg sm:text-xl font-semibold mb-2 sm:mb-3">Kaliteli Hizmet</h4>
+            <h3 className="text-lg sm:text-xl font-semibold mb-2 sm:mb-3">Kaliteli Hizmet</h3>
             <p className="text-muted-foreground text-sm sm:text-base">Profesyonel berberlik</p>
-          </div>
+          </article>
         </div>
-      </div>
-    </div>
+      </section>
+      </main>
+    </>
   );
 };
 

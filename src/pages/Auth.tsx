@@ -9,6 +9,7 @@ import { useAuth } from '@/hooks/useAuth';
 import { Scissors, UserPlus, LogIn } from 'lucide-react';
 import { loginSchema, signupSchema } from '@/lib/validation';
 import { toast } from 'sonner';
+import SEO from '@/components/SEO';
 
 const Auth = () => {
   const navigate = useNavigate();
@@ -62,7 +63,13 @@ const Auth = () => {
   }
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-background via-secondary/30 to-accent/20 p-4">
+    <>
+      <SEO 
+        title="Giriş Yap & Kayıt Ol"
+        description="Ömrüm Erkek Kuaför hesabınıza giriş yapın veya yeni hesap oluşturun. Hızlı ve kolay randevu sistemi."
+        canonical="/auth"
+      />
+      <main className="min-h-screen flex items-center justify-center bg-gradient-to-br from-background via-secondary/30 to-accent/20 p-4">
       <div className="w-full max-w-md">
         <div className="text-center mb-8">
           <div className="flex items-center justify-center gap-2 mb-4">
@@ -133,7 +140,8 @@ const Auth = () => {
           </TabsContent>
         </Tabs>
       </div>
-    </div>
+      </main>
+    </>
   );
 };
 
