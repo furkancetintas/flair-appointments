@@ -3,7 +3,7 @@ import { AdminSidebar } from "@/components/admin/AdminSidebar";
 import { LogOut } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useAuth } from "@/hooks/useAuth";
-import { useNavigate } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import { toast } from "sonner";
 
 interface AdminLayoutProps {
@@ -34,7 +34,7 @@ export function AdminLayout({ children }: AdminLayoutProps) {
             <div className="flex items-center justify-between h-full px-3 sm:px-4">
               <div className="flex items-center gap-2 sm:gap-4">
                 <SidebarTrigger />
-                <h1 className="text-sm sm:text-xl font-bold text-primary truncate">Ömrüm Kuaför<span className="hidden sm:inline"> - Admin</span></h1>
+                <Link to="/" className="flex items-center"><h2 className="text-xl font-bold text-primary truncate">Ömrüm Kuaför<span className="hidden sm:inline"> - Admin</span></h1></Link>
               </div>
               <Button
                 variant="ghost"
