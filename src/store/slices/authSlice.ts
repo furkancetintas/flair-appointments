@@ -107,7 +107,11 @@ export const signUp = createAsyncThunk(
 
       if (error) throw error;
 
-      toast.success('Hesabınız başarıyla oluşturuldu!');
+      toast.success('Hesabınız başarıyla oluşturuldu!',
+        {
+          description: "E-posta adresinize gönderilen Doğrulama Linkine tıklayıp kaydınızı tamamlayın!"
+        }
+      );
       return data;
     } catch (error: any) {
       toast.error(error.message);
