@@ -19,7 +19,7 @@ export function Header() {
     <header className="h-16 border-b bg-background/95 backdrop-blur sticky top-0 z-50">
       <div className="container mx-auto h-full px-4">
         <div className="flex items-center justify-between h-full">
-          <div className="py-3 sm:py-4 flex items-center">
+          <div className="px-0 py-3 sm:py-4 flex items-center">
             <Scissors className="h-8 w-8 sm:h-12 sm:w-12 text-primary" />
             <Link to="/" className="flex items-center"><h1 className="text-2xl font-bold text-primary">Ömrüm Kuaför</h1></Link>
           </div>
