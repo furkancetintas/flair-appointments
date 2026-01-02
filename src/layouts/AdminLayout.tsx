@@ -34,7 +34,7 @@ export function AdminLayout({ children }: AdminLayoutProps) {
             <div className="flex items-center justify-between h-full px-3 sm:px-4">
               <div className="flex items-center gap-2 sm:gap-4">
                 <SidebarTrigger />
-                <Link to="/" className="flex items-center"><h2 className="text-xl font-bold text-primary truncate">Ömrüm Kuaför<span className="hidden sm:inline"> - Admin</span></h1></Link>
+                <Link to="/" className="flex items-center"><h2 className="text-xl font-bold text-primary truncate">Ömrüm Kuaför<span className="hidden sm:inline"> - Admin</span></h2></Link>
               </div>
               <Button
                 variant="ghost"
