@@ -100,7 +100,7 @@ export default function AdminAppointments() {
                   <TableRow><TableCell colSpan={6} className="text-center py-8"><Calendar className="h-8 w-8 text-muted-foreground mx-auto mb-2" /><p className="text-muted-foreground">Bu tarihte randevu yok</p></TableCell></TableRow>
                 ) : filteredAppointments.map((apt) => (
                   <TableRow key={apt.id}>
-                    <TableCell><div className="flex items-center gap-2"><User className="h-4 w-4" /><div><p className="font-medium">{apt.customer?.full_name || 'İsimsiz'}</p><p className="text-sm text-muted-foreground">{apt.customer?.email}</p></div></div></TableCell>
+                    <TableCell><div className="flex items-center gap-2"><User className="h-4 w-4" /><div><p className="font-medium">{apt.customer?.full_name || 'İsimsiz'}</p></div></div></TableCell>
                     <TableCell>{apt.customer?.phone ? <a href={`tel:${apt.customer.phone}`} className="text-primary hover:underline flex items-center gap-1"><Phone className="h-3 w-3" />{apt.customer.phone}</a> : <span className="text-muted-foreground">-</span>}</TableCell>
                     <TableCell>{apt.appointment_time}</TableCell>
                     <TableCell>{apt.service}</TableCell>
