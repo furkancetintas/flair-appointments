@@ -22,7 +22,7 @@ export default function AdminShopStatus() {
 
   return (
     <div className="space-y-6">
-      <div><h2 className="text-2xl font-bold mb-2">Dükkan Durumu</h2><p className="text-muted-foreground">Açık/kapalı durumunu yönetin</p></div>
+      <div><h2 className="text-xl sm:text-2xl font-bold mb-2">Dükkan Durumu</h2><p className="text-muted-foreground">Açık/kapalı durumunu yönetin</p></div>
       <Card>
         <CardHeader><CardTitle className="flex items-center gap-2"><Store className="h-5 w-5" />Mevcut Durum</CardTitle></CardHeader>
         <CardContent>

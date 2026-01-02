@@ -75,7 +75,7 @@ export default function AdminServices() {
   return (
     <div className="space-y-6">
       <div>
-        <h2 className="text-xl sm:text-2xl font-bold mb-2">Hizmetler</h2>
+        <h2 className="text-2xl font-semibold mb-2">Hizmetler</h2>
         <p className="text-sm sm:text-base text-muted-foreground">Sunduğunuz hizmetleri ve fiyatlarını yönetin</p>
       </div>
       

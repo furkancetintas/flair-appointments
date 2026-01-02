@@ -26,7 +26,7 @@ export default function AdminWorkingHours() {
 
   return (
     <div className="space-y-6">
-      <div><h2 className="text-xl sm:text-2xl font-bold mb-2">Çalışma Saatleri</h2><p className="text-sm sm:text-base text-muted-foreground">Haftalık programınızı ayarlayın</p></div>
+      <div><h2 className="text-2xl font-semibold mb-2">Çalışma Saatleri</h2><p className="text-sm sm:text-base text-muted-foreground">Haftalık programınızı ayarlayın</p></div>
       <Card>
         <CardHeader><CardTitle className="flex items-center gap-2 text-base sm:text-lg"><Calendar className="h-5 w-5" />Program</CardTitle></CardHeader>
         <CardContent className="space-y-3 sm:space-y-4">

@@ -44,7 +44,7 @@ export default function AdminAppointments() {
 
   return (
     <div className="space-y-6">
-      <div><h2 className="text-xl sm:text-2xl font-bold mb-2">Randevular</h2><p className="text-sm sm:text-base text-muted-foreground">Müşteri randevularını yönetin</p></div>
+      <div><h2 className="text-2xl font-semibold mb-2">Randevular</h2><p className="text-sm sm:text-base text-muted-foreground">Müşteri randevularını yönetin</p></div>
       <div className="grid grid-cols-2 sm:grid-cols-2 md:grid-cols-4 gap-3 sm:gap-4">
         <Card><CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2"><CardTitle className="text-xs sm:text-sm font-medium">Bugünkü</CardTitle><Calendar className="h-4 w-4 text-muted-foreground hidden sm:block" /></CardHeader><CardContent><div className="text-xl sm:text-2xl font-bold">{filteredAppointments.length}</div></CardContent></Card>
         <Card><CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2"><CardTitle className="text-xs sm:text-sm font-medium">Bekleyen</CardTitle><Clock className="h-4 w-4 text-muted-foreground hidden sm:block" /></CardHeader><CardContent><div className="text-xl sm:text-2xl font-bold">{filteredAppointments.filter(a => a.status === 'pending').length}</div></CardContent></Card>
