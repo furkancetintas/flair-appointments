@@ -67,7 +67,7 @@ export const fetchAdminAppointments = createAsyncThunk(
         .from('appointments')
         .select(`
           *,
-          customer:profiles!customer_id(full_name, email, phone)
+          customer:profiles!appointments_customer_id_fkey(full_name, email, phone)
         `)
         .order('appointment_date', { ascending: true })
         .order('appointment_time', { ascending: true });
@@ -164,7 +164,7 @@ export const updateAppointmentStatus = createAsyncThunk(
         .eq('id', appointmentId)
         .select(`
           *,
-          customer:profiles!customer_id(full_name, email, phone)
+          customer:profiles!appointments_customer_id_fkey(full_name, email, phone)
         `)
         .single();
 
@@ -193,7 +193,7 @@ export const fetchAppointmentById = createAsyncThunk(
         .from('appointments')
         .select(`
           *,
-          customer:profiles!customer_id(full_name, email, phone)
+          customer:profiles!appointments_customer_id_fkey(full_name, email, phone)
         `)
         .eq('id', appointmentId)
         .single();

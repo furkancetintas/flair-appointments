@@ -8,7 +8,7 @@ import { Badge } from "@/components/ui/badge";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Calendar as CalendarComponent } from "@/components/ui/calendar";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
-import { Calendar, Clock, User, CheckCircle, XCircle } from "lucide-react";
+import { Calendar, Clock, User, CheckCircle, XCircle, Phone } from "lucide-react";
 import { format } from "date-fns";
 import { tr } from "date-fns/locale";
 import { toast } from "sonner";
@@ -72,6 +72,11 @@ export default function AdminAppointments() {
                   <div>
                     <p className="font-medium text-sm">{apt.customer?.full_name || 'İsimsiz'}</p>
                     <p className="text-xs text-muted-foreground">{apt.customer?.email}</p>
+                    {apt.customer?.phone && (
+                      <a href={`tel:${apt.customer.phone}`} className="text-xs text-primary flex items-center gap-1 mt-1">
+                        <Phone className="h-3 w-3" />{apt.customer.phone}
+                      </a>
+                    )}
                   </div>
                   {getStatusBadge(apt.status)}
                 </div>
@@ -90,13 +95,14 @@ export default function AdminAppointments() {
           {/* Desktop View */}
           <div className="hidden md:block overflow-x-auto">
             <Table>
-              <TableHeader><TableRow><TableHead>Müşteri</TableHead><TableHead>Saat</TableHead><TableHead>Hizmet</TableHead><TableHead>Durum</TableHead><TableHead>İşlemler</TableHead></TableRow></TableHeader>
+              <TableHeader><TableRow><TableHead>Müşteri</TableHead><TableHead>Telefon</TableHead><TableHead>Saat</TableHead><TableHead>Hizmet</TableHead><TableHead>Durum</TableHead><TableHead>İşlemler</TableHead></TableRow></TableHeader>
               <TableBody>
                 {filteredAppointments.length === 0 ? (
-                  <TableRow><TableCell colSpan={5} className="text-center py-8"><Calendar className="h-8 w-8 text-muted-foreground mx-auto mb-2" /><p className="text-muted-foreground">Bu tarihte randevu yok</p></TableCell></TableRow>
+                  <TableRow><TableCell colSpan={6} className="text-center py-8"><Calendar className="h-8 w-8 text-muted-foreground mx-auto mb-2" /><p className="text-muted-foreground">Bu tarihte randevu yok</p></TableCell></TableRow>
                 ) : filteredAppointments.map((apt) => (
                   <TableRow key={apt.id}>
                     <TableCell><div className="flex items-center gap-2"><User className="h-4 w-4" /><div><p className="font-medium">{apt.customer?.full_name || 'İsimsiz'}</p><p className="text-sm text-muted-foreground">{apt.customer?.email}</p></div></div></TableCell>
+                    <TableCell>{apt.customer?.phone ? <a href={`tel:${apt.customer.phone}`} className="text-primary hover:underline flex items-center gap-1"><Phone className="h-3 w-3" />{apt.customer.phone}</a> : <span className="text-muted-foreground">-</span>}</TableCell>
                     <TableCell>{apt.appointment_time}</TableCell>
                     <TableCell>{apt.service}</TableCell>
                     <TableCell>{getStatusBadge(apt.status)}</TableCell>
