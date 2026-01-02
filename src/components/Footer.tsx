@@ -91,7 +91,8 @@ export const Footer = () => {
               <div className="flex items-start gap-3 text-sm">
                 <Clock className="w-4 h-4 text-primary mt-0.5 flex-shrink-0" />
                 <div className="text-muted-foreground">
-                  <p>Pzt - Cmt: 09:00 - 21:00</p>
+                  <p>Pazartesi - Cuma: 08:30 - 22:00</p>
+                  <p>Cumartesi: 08:30 - 23:00</p>
                   <p>Pazar: Kapalı</p>
                 </div>
               </div>
