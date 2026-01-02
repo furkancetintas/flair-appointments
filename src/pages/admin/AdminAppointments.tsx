@@ -71,7 +71,6 @@ export default function AdminAppointments() {
                 <div className="flex items-start justify-between">
                   <div>
                     <p className="font-medium text-sm">{apt.customer?.full_name || 'İsimsiz'}</p>
-                    <p className="text-xs text-muted-foreground">{apt.customer?.email}</p>
                     {apt.customer?.phone && (
                       <a href={`tel:${apt.customer.phone}`} className="text-xs text-primary flex items-center gap-1 mt-1">
                         <Phone className="h-3 w-3" />{apt.customer.phone}
